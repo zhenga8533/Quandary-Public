@@ -1,34 +1,23 @@
-mutable Q main (mutable int arg) {
-	if (arg == 0)
-		return nil;
-	mutable Ref list = randomList(arg);
-	while (arg > 0) {
-		int index = randomInt(arg);
-		list = rmElement(list, index);
-		list = randomInt(100000) . list;
-		arg = arg - 1;
-	}
-	return length(list);
+Q main(int arg) {
+    mutable Ref list = randomList(arg);
+    list = concat(list, list);
+    return length(list);
+}
+
+Ref concat(Ref first, Ref second) {
+    if (isNil(first) != 0)
+        return second;
+    if (isNil(right(first)) != 0)
+        return left(first) . second;
+    return left(first) . concat((Ref)right(first), second);
 }
 
 int length(Ref list) {
-	if (isNil(list) != 0) return 0;
-	return 1 + length((Ref)right(list));
+    if (isNil(list) != 0) return 0;
+    return 1 + length((Ref)right(list));
 }
 
-Ref randomList(int length) {
-	if (length == 0) {
-        return nil;
-    }
-    return randomInt(100000) . randomList(length - 1);
-}
-
-mutable Ref rmElement(Ref list, int index) {
-	if (isNil(list) != 0)
-		return nil;
-	if (index == 0) {
-		return (Ref)right(list);
-	}
-	setRight(list, rmElement((Ref)right(list), index-1));
-	return list;
+Ref randomList(int n) {
+    if (n == 0) return nil;
+    return randomInt(10000) . randomList(n - 1);
 }
