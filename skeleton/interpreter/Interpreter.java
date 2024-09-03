@@ -108,6 +108,12 @@ public class Interpreter {
     Object evaluate(Expr expr) {
         if (expr instanceof ConstExpr) {
             return ((ConstExpr)expr).getValue();
+        } else if (expr instanceof UnaryExpr) {
+            UnaryExpr unaryExpr = (UnaryExpr)expr;
+            switch (unaryExpr.getOperator()) {
+                case UnaryExpr.NEGATION: return -(Long)evaluate(unaryExpr.getExpr());
+                default: throw new RuntimeException("Unhandled operator");
+            }
         } else if (expr instanceof BinaryExpr) {
             BinaryExpr binaryExpr = (BinaryExpr)expr;
             switch (binaryExpr.getOperator()) {

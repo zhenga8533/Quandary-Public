@@ -27,7 +27,7 @@ parser code {:
 
 :};
 
-terminal PLUS, MINUS, TIMES, LPAREN, RPAREN;
+terminal PLUS, MINUS, TIMES, UMINUS, LPAREN, RPAREN;
 terminal Long    INTCONST;
 
 non terminal Program         program;
@@ -48,6 +48,9 @@ expr ::= INTCONST:c
          {: RESULT = new ConstExpr(c, loc(cleft, cright)); :}
       |  binaryExpr:e
          {: RESULT = e; :}
+      |  MINUS expr:e
+         {: RESULT = new UnaryExpr(UnaryExpr.NEGATION, e, loc(eleft, eright)); :}
+         %prec UMINUS
       |  LPAREN expr:e RPAREN
          {: RESULT = e; :}
       ;
