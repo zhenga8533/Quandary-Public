@@ -4,8 +4,8 @@ public class UnaryExpr extends Expr {
 
     public static final int NEGATION = 1;
 
-    final int operator;
     final Expr expr;
+    final int operator;
 
     public UnaryExpr(int operator, Expr expr, Location loc) {
         super(loc);
