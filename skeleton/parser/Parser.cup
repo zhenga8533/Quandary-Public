@@ -41,13 +41,11 @@ precedence left UMINUS;
 
 start with program;
 
-program ::= expr:e
+program ::= RET expr:e SEMICOL
             {: RESULT = new Program(e, loc(eleft, eright)); :}
          ;
 
-expr ::= RET expr:e SEMICOL
-         {: RESULT = new ReturnStmt(e, loc(eleft, eright)); :}
-      |  INTCONST:c
+expr ::= INTCONST:c
          {: RESULT = new ConstExpr(c, loc(cleft, cright)); :}
       |  binaryExpr:e
          {: RESULT = e; :}

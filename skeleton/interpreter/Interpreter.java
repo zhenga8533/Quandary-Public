@@ -106,9 +106,7 @@ public class Interpreter {
     }
 
     Object evaluate(Expr expr) {
-        if (expr instanceof ReturnStmt) {
-            return evaluate(((ReturnStmt)expr).getExpr());
-        } else if (expr instanceof ConstExpr) {
+        if (expr instanceof ConstExpr) {
             return ((ConstExpr)expr).getValue();
         } else if (expr instanceof UnaryExpr) {
             UnaryExpr unaryExpr = (UnaryExpr)expr;
