@@ -27,6 +27,7 @@ parser code {:
 
 :};
 
+terminal RET, SEMICOL;
 terminal PLUS, MINUS, TIMES, UMINUS, LPAREN, RPAREN;
 terminal Long    INTCONST;
 
@@ -44,7 +45,9 @@ program ::= expr:e
             {: RESULT = new Program(e, loc(eleft, eright)); :}
          ;
 
-expr ::= INTCONST:c
+expr ::= RET expr:e SEMICOL
+         {: RESULT = new ReturnStmt(e, loc(eleft, eright)); :}
+      |  INTCONST:c
          {: RESULT = new ConstExpr(c, loc(cleft, cright)); :}
       |  binaryExpr:e
          {: RESULT = e; :}

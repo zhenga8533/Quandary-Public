@@ -63,6 +63,9 @@ white_space = {new_line} | [ \t\f]
 {IntLiteral} { return symbol("Intconst", INTCONST, Long.parseLong(yytext())); }
 
 /* other tokens (you can add more tokens here) */
+"return"          { return symbol("return",  RET); }
+";"               { return symbol(";",  SEMICOL); }
+
 "+"               { return symbol("+",  PLUS); }
 "-"               { return symbol("-",  MINUS); }
 "*"               { return symbol("*",  TIMES); }
