@@ -7,7 +7,7 @@ Ref main(int arg) {
 }
 
 Ref append(Ref list1, Ref list2) {
-    if (isNil(list1) == 1)
+    if (isNil(list1) != 0)
         return list2;
     return left(list1) . append((Ref)right(list1), list2);
 }
