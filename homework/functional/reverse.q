@@ -13,8 +13,6 @@ Ref append(Ref list, Q q) {
 Ref reverse(Ref q) {
     if (isNil(q) != 0)
         return q;
-    if (isAtom(q) != 0)
-        return q;
 
     return append(reverse((Ref)right(q)), left(q));
 }
