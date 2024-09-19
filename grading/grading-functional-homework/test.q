@@ -51,3 +51,41 @@ int sameLength(Ref list1, Ref list2) {
         return 0;
     return sameLength((Ref)right(list1), (Ref)right(list2));
 }
+
+
+int genericEquals(Q item1, Q item2) {
+    if (isNil(item1) != isNil(item2)) {
+        return 0;
+    } else {
+        if (isNil(item1) == 1) {
+            return 1;
+        }
+    }
+    if (isAtom(item1) != isAtom(item2)) {
+        return 0;
+    } else {
+        if (isAtom(item1) == 1) {
+            if ((int)item1 == (int)item2) { /* ??? */
+                return 1;
+            } else {
+                return 0;
+            }
+        }
+    }
+    /* item1 and item2 are Ref's */
+    if (genericEquals(left((Ref)item1), left((Ref)item2)) == 1 && genericEquals(right((Ref)item1), right((Ref)item2)) == 1) {
+        return 1;
+    }
+    return 0;
+}
+
+
+
+int main(int arg) {
+    Ref input = (nil . ((314 . nil) . ((15 . nil) . ((926 . (535 . (89 . (79 . nil)))) . ((3 . (2 . (3 . (8 . (4 . nil))))) . nil))))); /* Complicated example */
+    if (isSorted(input) != 0) {
+        return 1;
+    }
+    return 0;
+}
+
