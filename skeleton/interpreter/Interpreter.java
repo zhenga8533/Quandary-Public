@@ -102,28 +102,66 @@ public class Interpreter {
     }
 
     Object executeRoot(Program astRoot, long arg) {
-        return evaluate(astRoot.getExpr());
+        return evaluateExpr(astRoot.getExpr());
     }
 
-    Object evaluate(Expr expr) {
+    Object evaluateStmt(Stmt stmt) {
+        if (stmt instanceof ReturnStmt) {
+            return evaluateExpr(((ReturnStmt)stmt).getExpr());
+        } else {
+            throw new RuntimeException("Unhandled Stmt type");
+        }
+    }
+
+    Object evaluateExpr(Expr expr) {
         if (expr instanceof ConstExpr) {
             return ((ConstExpr)expr).getValue();
         } else if (expr instanceof UnaryExpr) {
             UnaryExpr unaryExpr = (UnaryExpr)expr;
             switch (unaryExpr.getOperator()) {
-                case UnaryExpr.NEGATION: return -(Long)evaluate(unaryExpr.getExpr());
+                case UnaryExpr.NEGATION: return -(Long)evaluateExpr(unaryExpr.getExpr());
                 default: throw new RuntimeException("Unhandled operator");
             }
         } else if (expr instanceof BinaryExpr) {
             BinaryExpr binaryExpr = (BinaryExpr)expr;
             switch (binaryExpr.getOperator()) {
-                case BinaryExpr.PLUS: return (Long)evaluate(binaryExpr.getLeftExpr()) + (Long)evaluate(binaryExpr.getRightExpr());
-                case BinaryExpr.MINUS: return (Long)evaluate(binaryExpr.getLeftExpr()) - (Long)evaluate(binaryExpr.getRightExpr());
-                case BinaryExpr.TIMES: return (Long)evaluate(binaryExpr.getLeftExpr()) * (Long)evaluate(binaryExpr.getRightExpr());
+                case BinaryExpr.PLUS: return (Long)evaluateExpr(binaryExpr.getLeftExpr()) + (Long)evaluateExpr(binaryExpr.getRightExpr());
+                case BinaryExpr.MINUS: return (Long)evaluateExpr(binaryExpr.getLeftExpr()) - (Long)evaluateExpr(binaryExpr.getRightExpr());
+                case BinaryExpr.TIMES: return (Long)evaluateExpr(binaryExpr.getLeftExpr()) * (Long)evaluateExpr(binaryExpr.getRightExpr());
                 default: throw new RuntimeException("Unhandled operator");
             }
         } else {
             throw new RuntimeException("Unhandled Expr type");
+        }
+    }
+
+    Object evaluateCond(Cond cond) {
+        if (cond instanceof BinaryCond) {
+            BinaryCond binaryCond = (BinaryCond)cond;
+            switch (binaryCond.getOperator()) {
+                case BinaryCond.LE: return (Long)evaluateExpr(binaryCond.getLeft()) <= (Long)evaluateExpr(binaryCond.getRight());
+                case BinaryCond.GE: return (Long)evaluateExpr(binaryCond.getLeft()) >= (Long)evaluateExpr(binaryCond.getRight());
+                case BinaryCond.EQ: return evaluateExpr(binaryCond.getLeft()).equals(evaluateExpr(binaryCond.getRight()));
+                case BinaryCond.NE: return !evaluateExpr(binaryCond.getLeft()).equals(evaluateExpr(binaryCond.getRight()));
+                case BinaryCond.LT: return (Long)evaluateExpr(binaryCond.getLeft()) < (Long)evaluateExpr(binaryCond.getRight());
+                case BinaryCond.GT: return (Long)evaluateExpr(binaryCond.getLeft()) > (Long)evaluateExpr(binaryCond.getRight());
+                default: throw new RuntimeException("Unhandled operator");
+            }
+        } else if (cond instanceof LogicalCond) {
+            LogicalCond logicalCond = (LogicalCond)cond;
+            switch (logicalCond.getOperator()) {
+                case LogicalCond.AND: return (Boolean)evaluateCond(logicalCond.getLeft()) && (Boolean)evaluateCond(logicalCond.getRight());
+                case LogicalCond.OR: return (Boolean)evaluateCond(logicalCond.getLeft()) || (Boolean)evaluateCond(logicalCond.getRight());
+                default: throw new RuntimeException("Unhandled operator");
+            }
+        } else if (conda instanceof UnaryCond) {
+            UnaryCond unaryCond = (UnaryCond)cond;
+            switch (unaryCond.getOperator()) {
+                case UnaryCond.NOT: return !(Boolean)evaluateCond(unaryCond.getCond());
+                default: throw new RuntimeException("Unhandled operator");
+            }
+        } else {
+            throw new RuntimeException("Unhandled Cond type");
         }
     }
 

@@ -63,14 +63,29 @@ white_space = {new_line} | [ \t\f]
 {IntLiteral} { return symbol("Intconst", INTCONST, Long.parseLong(yytext())); }
 
 /* other tokens (you can add more tokens here) */
-"return"          { return symbol("return",  RET); }
-";"               { return symbol(";",  SEMICOL); }
+"return"            { return symbol("return",  RET); }
+";"                 { return symbol(";",  SEMICOL); }
+"if"                { return symbol("if",  IF); }
 
-"+"               { return symbol("+",  PLUS); }
-"-"               { return symbol("-",  MINUS); }
-"*"               { return symbol("*",  TIMES); }
-"("               { return symbol("(",  LPAREN); }
-")"               { return symbol(")",  RPAREN); }
+"int"               { return symbol("int",  INT); }
+
+"+"                 { return symbol("+",  PLUS); }
+"-"                 { return symbol("-",  MINUS); }
+"*"                 { return symbol("*",  TIMES); }
+"("                 { return symbol("(",  LPAREN); }
+")"                 { return symbol(")",  RPAREN); }
+"{"                 { return symbol("{",  LBRACKET); }
+"}"                 { return symbol("}",  RBRACKET); }
+
+"<="                { return symbol("<=", LE); }
+">="                { return symbol(">=", GE); }
+"=="                { return symbol("==", EQ); }
+"!="                { return symbol("!=", NE); }
+"<"                 { return symbol("<",  LT); }
+">"                 { return symbol(">",  GT); }
+"&&"                { return symbol("&&", AND); }
+"||"                { return symbol("||", OR); }
+"!"                 { return symbol("!",  NOT); }
 
 /* You shouldn't need to modify anything below this */
 

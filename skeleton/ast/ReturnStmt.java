@@ -1,11 +1,10 @@
 package ast;
 
-public class ReturnStmt extends Expr {
+public class ReturnStmt extends Stmt {
 
     final Expr expr;
 
     public ReturnStmt(Expr expr, Location loc) {
-        // Not in use, found it easier to just change Parser.cup :)
         super(loc);
         this.expr = expr;
     }

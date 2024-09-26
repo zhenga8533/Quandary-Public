@@ -27,22 +27,55 @@ parser code {:
 
 :};
 
-terminal RET, SEMICOL;
+terminal RET, SEMICOL, LBRACKET, RBRACKET, INT, IF;
 terminal PLUS, MINUS, TIMES, UMINUS, LPAREN, RPAREN;
-terminal Long    INTCONST;
+terminal LE, GE, EQ, NE, LT, GT, AND, OR, NOT;
+terminal Long INTCONST;
+terminal String IDENT;
 
-non terminal Program         program;
-non terminal Expr            expr;
-non terminal BinaryExpr      binaryExpr;
+non terminal Program       program;
+non terminal FuncDef       funcDef;
+non terminal VarDecl       varDecl;
+non terminal Type          type;
+non terminal StmtList      stmtList;
+non terminal Stmt          stmt;
+non terminal Expr          expr;
+non terminal BinaryExpr    binaryExpr;
+non terminal Cond          cond;
 
 precedence left PLUS, MINUS;
 precedence left TIMES;
 precedence left UMINUS;
+precedence left LE, GE, EQ, NE, LT, GT, AND, OR, NOT;
 
 start with program;
 
-program ::= RET expr:e SEMICOL
-            {: RESULT = new Program(e, loc(eleft, eright)); :}
+program ::= funcDef:f
+            {: RESULT = new Program(f, loc(fleft, fright)); :}
+         ;
+
+funcDef ::= varDecl:v LPAREN INT INTCONST:i RPAREN LBRACKET stmtList:s RBRACKET
+            {: RESULT = new funcDef(v, i, s); :}
+         ;
+
+varDecl ::= type:t IDENT:i
+            {: RESULT = new varDecl(t, i, loc(tleft, tright)); :}
+         ;
+
+type ::= INT
+         {: RESULT = new Type(Type.INT); :}
+      ;
+
+stmtList ::= stmt:s stmtList:l
+             {: RESULT = new StmtList(s, l, loc(sleft, sright)); :}
+         |   
+             {: RESULT = null; :}
+         ;
+
+stmt ::= IF LPAREN cond:c RPAREN stmt:s
+            {: RESULT = new IfStmt(c, s, loc(cleft, cright)); :}
+         |  RET expr:e SEMICOL
+            {: RESULT = new ReturnStmt(e, loc(eleft, eright)); :}
          ;
 
 expr ::= INTCONST:c
@@ -63,3 +96,25 @@ binaryExpr ::= expr:e1 PLUS expr:e2
             |  expr:e1 TIMES expr:e2
                {: RESULT = new BinaryExpr(e1, BinaryExpr.TIMES, e2, loc(e1left, e1right)); :}
             ;
+
+cond ::= expr:e1 LE expr:e2
+         {: RESULT = new BinaryCond(e1, BinaryCond.LE, e2, loc(e1left, e1right)); :}
+      | expr:e1 GE expr:e2
+         {: RESULT = new BinaryCond(e1, BinaryCond.GE, e2, loc(e1left, e1right)); :}
+      | expr:e1 EQ expr:e2
+         {: RESULT = new BinaryCond(e1, BinaryCond.EQ, e2, loc(e1left, e1right)); :}
+      | expr:e1 NE expr:e2
+         {: RESULT = new BinaryCond(e1, BinaryCond.NE, e2, loc(e1left, e1right)); :}
+      | expr:e1 LT expr:e2
+         {: RESULT = new BinaryCond(e1, BinaryCond.LT, e2, loc(e1left, e1right)); :}
+      | expr:e1 GT expr:e2
+         {: RESULT = new BinaryCond(e1, BinaryCond.GT, e2, loc(e1left, e1right)); :}
+      | cond:c1 AND cond:c2
+         {: RESULT = new LogicalCond(c1, LogicalCond.AND, c2, loc(c1left, c1right)); :}
+      | cond:c1 OR cond:c2
+         {: RESULT = new LogicalCond(c1, LogicalCond.OR, c2, loc(c1left, c1right)); :}
+      | NOT cond:c
+         {: RESULT = new UnaryCond(UnaryCond.NOT, c, loc(cleft, cright)); :}
+      | LPAREN cond:c RPAREN
+         {: RESULT = c; :}
+      ;
