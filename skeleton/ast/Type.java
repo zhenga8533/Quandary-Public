@@ -17,10 +17,12 @@ public class Type {
 
     @Override
     public String toString() {
+        String s = null;
         switch (type) {
-            case INT: return "int";
-            case REF: return "Ref";
-            case SUPERTYPE: return "Q";
+            case INT: s = "Int"; break;
+            case REF: s = "Ref"; break;
+            case SUPERTYPE: s = "Q"; break;
         }
+        return s;
     }
 }

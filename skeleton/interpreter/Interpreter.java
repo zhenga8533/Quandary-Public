@@ -102,7 +102,16 @@ public class Interpreter {
     }
 
     Object executeRoot(Program astRoot, long arg) {
-        return evaluateExpr(astRoot.getExpr());
+        return evaluateStmtList(astRoot.getFunc().getStmtList());
+    }
+
+    Object evaluateStmtList(StmtList stmtList) {
+        if (stmtList == null) {
+            return null;
+        } else {
+            Object stmtResult = evaluateStmt(stmtList.getStmt());
+            return stmtResult;
+        }
     }
 
     Object evaluateStmt(Stmt stmt) {
@@ -154,10 +163,10 @@ public class Interpreter {
                 case LogicalCond.OR: return (Boolean)evaluateCond(logicalCond.getLeft()) || (Boolean)evaluateCond(logicalCond.getRight());
                 default: throw new RuntimeException("Unhandled operator");
             }
-        } else if (conda instanceof UnaryCond) {
+        } else if (cond instanceof UnaryCond) {
             UnaryCond unaryCond = (UnaryCond)cond;
             switch (unaryCond.getOperator()) {
-                case UnaryCond.NOT: return !(Boolean)evaluateCond(unaryCond.getCond());
+                case UnaryCond.NOT: return !(Boolean)evaluateCond(unaryCond.getExpr());
                 default: throw new RuntimeException("Unhandled operator");
             }
         } else {

@@ -54,12 +54,12 @@ program ::= funcDef:f
             {: RESULT = new Program(f, loc(fleft, fright)); :}
          ;
 
-funcDef ::= varDecl:v LPAREN INT INTCONST:i RPAREN LBRACKET stmtList:s RBRACKET
-            {: RESULT = new funcDef(v, i, s); :}
+funcDef ::= varDecl:v LPAREN varDecl:a RPAREN LBRACKET stmtList:s RBRACKET
+            {: RESULT = new FuncDef(v, a, s, loc(vleft, vright)); :}
          ;
 
 varDecl ::= type:t IDENT:i
-            {: RESULT = new varDecl(t, i, loc(tleft, tright)); :}
+            {: RESULT = new VarDecl(t, i, loc(tleft, tright)); :}
          ;
 
 type ::= INT

@@ -1,12 +1,12 @@
 package ast;
 
-public abstract class FuncDef extends ASTNode {
+public class FuncDef extends ASTNode {
 
     final VarDecl varDecl;
-    final int arg;
+    final VarDecl arg;
     final StmtList stmtList;
 
-    FuncDef(VarDecl varDecl, int arg, StmtList stmtList, Location loc) {
+    public FuncDef(VarDecl varDecl, VarDecl arg, StmtList stmtList, Location loc) {
         super(loc);
         this.varDecl = varDecl;
         this.arg = arg;
@@ -17,7 +17,7 @@ public abstract class FuncDef extends ASTNode {
         return varDecl;
     }
 
-    public int getArg() {
+    public VarDecl getArg() {
         return arg;
     }
 

@@ -49,6 +49,7 @@ import interpreter.Interpreter;
 
 
 IntLiteral = 0 | [1-9][0-9]*
+Identifier = main | arg
 
 new_line = \r|\n|\r\n;
 
@@ -61,6 +62,7 @@ white_space = {new_line} | [ \t\f]
 
 /* int literal token */
 {IntLiteral} { return symbol("Intconst", INTCONST, Long.parseLong(yytext())); }
+{Identifier} { return symbol("Identifier", IDENT, yytext()); }
 
 /* other tokens (you can add more tokens here) */
 "return"            { return symbol("return",  RET); }
