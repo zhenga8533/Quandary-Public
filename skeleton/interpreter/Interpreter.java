@@ -131,7 +131,11 @@ public class Interpreter {
     }
 
     Object evaluateStmt(Stmt stmt, FuncDef func) {
-        if (stmt instanceof IfStmt) {
+        if (stmt instanceof DeclStmt) {
+            DeclStmt declStmt = (DeclStmt)stmt;
+            func.getVarMap().put(declStmt.getVarDecl().getIdent(), (Long)evaluateExpr(declStmt.getExpr(), func));
+            return null;
+        } else if (stmt instanceof IfStmt) {
             IfStmt ifStmt = (IfStmt)stmt;
             if ((Boolean)evaluateCond(ifStmt.getCond(), func)) {
                 return evaluateStmt(ifStmt.getStmt(), func);

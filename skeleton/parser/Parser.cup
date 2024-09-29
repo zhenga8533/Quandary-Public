@@ -28,7 +28,7 @@ parser code {:
 :};
 
 terminal RET, SEMICOL, LBRACKET, RBRACKET;
-terminal PRINT, IF, ELSE, COMMA;
+terminal PRINT, IF, ELSE, COMMA, EQUAL;
 terminal PLUS, MINUS, TIMES, UMINUS, LPAREN, RPAREN;
 terminal LE, GE, EQ, NE, LT, GT, AND, OR, NOT;
 terminal Long INTCONST;
@@ -97,7 +97,9 @@ stmtList ::= stmt:s stmtList:l
              {: RESULT = null; :}
          ;
 
-stmt ::= IF LPAREN cond:c RPAREN stmt:s
+stmt ::= varDecl:v EQUAL expr:e SEMICOL
+            {: RESULT = new DeclStmt(v, e, loc(vleft, vright)); :}
+         |  IF LPAREN cond:c RPAREN stmt:s
             {: RESULT = new IfStmt(c, s, loc(cleft, cright)); :}
          |  IF LPAREN cond:c RPAREN stmt:t ELSE stmt:e
             {: RESULT = new IfElseStmt(c, t, e, loc(cleft, cright)); :}
