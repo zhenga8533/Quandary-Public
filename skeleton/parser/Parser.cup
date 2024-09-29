@@ -27,11 +27,14 @@ parser code {:
 
 :};
 
-terminal RET, SEMICOL, LBRACKET, RBRACKET, PRINT, INT, IF;
+terminal RET, SEMICOL, LBRACKET, RBRACKET;
+terminal PRINT, IF, ELSE;
 terminal PLUS, MINUS, TIMES, UMINUS, LPAREN, RPAREN;
 terminal LE, GE, EQ, NE, LT, GT, AND, OR, NOT;
 terminal Long INTCONST;
 terminal String IDENT;
+
+terminal INT;
 
 non terminal Program       program;
 non terminal FuncDef       funcDef;
@@ -43,6 +46,7 @@ non terminal Expr          expr;
 non terminal BinaryExpr    binaryExpr;
 non terminal Cond          cond;
 
+precedence left IF, ELSE;
 precedence left PLUS, MINUS;
 precedence left TIMES;
 precedence left UMINUS;
@@ -74,6 +78,8 @@ stmtList ::= stmt:s stmtList:l
 
 stmt ::= IF LPAREN cond:c RPAREN stmt:s
             {: RESULT = new IfStmt(c, s, loc(cleft, cright)); :}
+         |  IF LPAREN cond:c RPAREN stmt:t ELSE stmt:e
+            {: RESULT = new IfElseStmt(c, t, e, loc(cleft, cright)); :}
          |  PRINT expr:e SEMICOL
             {: RESULT = new PrintStmt(e, loc(eleft, eright)); :}
          |  RET expr:e SEMICOL

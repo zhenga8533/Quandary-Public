@@ -66,9 +66,10 @@ white_space = {new_line} | [ \t\f]
 
 /* other tokens (you can add more tokens here) */
 "print"            { return symbol("print",  PRINT); }
+"if"                { return symbol("if",  IF); }
+"else"              { return symbol("else", ELSE); }
 "return"            { return symbol("return",  RET); }
 ";"                 { return symbol(";",  SEMICOL); }
-"if"                { return symbol("if",  IF); }
 
 "int"               { return symbol("int",  INT); }
 

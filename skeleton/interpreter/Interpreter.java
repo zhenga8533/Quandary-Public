@@ -106,20 +106,34 @@ public class Interpreter {
     }
 
     Object evaluateStmtList(StmtList stmtList) {
-    if (stmtList == null) {
-        return null;
-    }
+        if (stmtList == null) {
+            return null;
+        }
 
-    Object result = evaluateStmt(stmtList.getStmt());
-    if (result != null) {
-        return result;
-    }
+        Object result = evaluateStmt(stmtList.getStmt());
+        if (result != null) {
+            return result;
+        }
 
-    return evaluateStmtList(stmtList.getStmtList());
-}
+        return evaluateStmtList(stmtList.getStmtList());
+    }
 
     Object evaluateStmt(Stmt stmt) {
-        if (stmt instanceof PrintStmt) {
+        if (stmt instanceof IfStmt) {
+            IfStmt ifStmt = (IfStmt)stmt;
+            if ((Boolean)evaluateCond(ifStmt.getCond())) {
+                return evaluateStmt(ifStmt.getStmt());
+            } else {
+                return null;
+            }
+        } else if (stmt instanceof IfElseStmt) {
+            IfElseStmt ifElseStmt = (IfElseStmt)stmt;
+            if ((Boolean)evaluateCond(ifElseStmt.getCondition())) {
+                return evaluateStmt(ifElseStmt.getThenBlock());
+            } else {
+                return evaluateStmt(ifElseStmt.getElseBlock());
+            }
+        } else if (stmt instanceof PrintStmt) {
             Object value = evaluateExpr(((PrintStmt)stmt).getExpr());
             System.out.println(value);
             return null;
