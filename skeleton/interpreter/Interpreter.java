@@ -147,6 +147,8 @@ public class Interpreter {
     Object evaluateExpr(Expr expr) {
         if (expr instanceof ConstExpr) {
             return ((ConstExpr)expr).getValue();
+        } else if (expr instanceof IdentExpr) {
+            return ((IdentExpr)expr).getName();
         } else if (expr instanceof UnaryExpr) {
             UnaryExpr unaryExpr = (UnaryExpr)expr;
             switch (unaryExpr.getOperator()) {

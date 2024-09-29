@@ -28,7 +28,7 @@ parser code {:
 :};
 
 terminal RET, SEMICOL, LBRACKET, RBRACKET;
-terminal PRINT, IF, ELSE;
+terminal PRINT, IF, ELSE, COMMA;
 terminal PLUS, MINUS, TIMES, UMINUS, LPAREN, RPAREN;
 terminal LE, GE, EQ, NE, LT, GT, AND, OR, NOT;
 terminal Long INTCONST;
@@ -36,15 +36,17 @@ terminal String IDENT;
 
 terminal INT;
 
-non terminal Program       program;
-non terminal FuncDef       funcDef;
-non terminal VarDecl       varDecl;
-non terminal Type          type;
-non terminal StmtList      stmtList;
-non terminal Stmt          stmt;
-non terminal Expr          expr;
-non terminal BinaryExpr    binaryExpr;
-non terminal Cond          cond;
+non terminal Program          program;
+non terminal FuncDef          funcDef;
+non terminal VarDecl          varDecl;
+non terminal Type             type;
+non terminal FormalDeclList   formalDeclList;
+non terminal NeFormalDeclList neFormalDeclList;
+non terminal StmtList         stmtList;
+non terminal Stmt             stmt;
+non terminal Expr             expr;
+non terminal BinaryExpr       binaryExpr;
+non terminal Cond             cond;
 
 precedence left IF, ELSE;
 precedence left PLUS, MINUS;
@@ -58,8 +60,8 @@ program ::= funcDef:f
             {: RESULT = new Program(f, loc(fleft, fright)); :}
          ;
 
-funcDef ::= varDecl:v LPAREN varDecl:a RPAREN LBRACKET stmtList:s RBRACKET
-            {: RESULT = new FuncDef(v, a, s, loc(vleft, vright)); :}
+funcDef ::= varDecl:v LPAREN formalDeclList:l RPAREN LBRACKET stmtList:s RBRACKET
+            {: RESULT = new FuncDef(v, l, s, loc(vleft, vright)); :}
          ;
 
 varDecl ::= type:t IDENT:i
@@ -69,6 +71,18 @@ varDecl ::= type:t IDENT:i
 type ::= INT
          {: RESULT = new Type(Type.INT); :}
       ;
+
+formalDeclList ::= neFormalDeclList:l
+                   {: RESULT = new FormalDeclList(l, loc(lleft, lright)); :}
+               |
+                   {: RESULT = null; :}
+               ;
+
+neFormalDeclList ::= varDecl:v COMMA neFormalDeclList:l
+                     {: RESULT = new NeFormalDeclList(v, l, loc(vleft, vright)); :}
+                  |  varDecl:v
+                     {: RESULT = new NeFormalDeclList(v, null, loc(vleft,vright)); :}
+                  ;
 
 stmtList ::= stmt:s stmtList:l
              {: RESULT = new StmtList(s, l, loc(sleft, sright)); :}
@@ -88,6 +102,8 @@ stmt ::= IF LPAREN cond:c RPAREN stmt:s
 
 expr ::= INTCONST:c
          {: RESULT = new ConstExpr(c, loc(cleft, cright)); :}
+      |  IDENT:c
+         {: RESULT = new IdentExpr(c, loc(cleft, cright)); :}
       |  binaryExpr:e
          {: RESULT = e; :}
       |  MINUS expr:e

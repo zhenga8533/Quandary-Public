@@ -71,6 +71,7 @@ white_space = {new_line} | [ \t\f]
 "return"            { return symbol("return",  RET); }
 ";"                 { return symbol(";",  SEMICOL); }
 
+","                 { return symbol(",", COMMA); }
 "int"               { return symbol("int",  INT); }
 
 "+"                 { return symbol("+",  PLUS); }
