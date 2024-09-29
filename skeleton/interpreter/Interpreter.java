@@ -102,7 +102,8 @@ public class Interpreter {
     }
 
     Object executeRoot(Program astRoot, long arg) {
-        return evaluateStmtList(astRoot.getFunc().getStmtList());
+        FuncDef mainFunc = astRoot.getFuncDefList().getFunc();
+        return evaluateStmtList(mainFunc.getStmtList());
     }
 
     Object evaluateStmtList(StmtList stmtList) {

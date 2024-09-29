@@ -3,19 +3,18 @@ package ast;
 import java.io.PrintStream;
 
 public class Program extends ASTNode {
+    final FuncDefList funcList;
 
-    final FuncDef func;
-
-    public Program(FuncDef func, Location loc) {
+    public Program(FuncDefList funcList, Location loc) {
         super(loc);
-        this.func = func;
+        this.funcList = funcList;
     }
 
-    public FuncDef getFunc() {
-        return func;
+    public FuncDefList getFuncDefList() {
+        return funcList;
     }
 
     public void println(PrintStream ps) {
-        ps.println(func);
+        ps.println(funcList);
     }
 }

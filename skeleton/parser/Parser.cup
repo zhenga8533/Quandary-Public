@@ -37,6 +37,7 @@ terminal String IDENT;
 terminal INT;
 
 non terminal Program          program;
+non terminal FuncDefList      funcDefList;
 non terminal FuncDef          funcDef;
 non terminal VarDecl          varDecl;
 non terminal Type             type;
@@ -56,9 +57,15 @@ precedence left LE, GE, EQ, NE, LT, GT, AND, OR, NOT;
 
 start with program;
 
-program ::= funcDef:f
-            {: RESULT = new Program(f, loc(fleft, fright)); :}
+program ::= funcDefList:l
+            {: RESULT = new Program(l, loc(lleft, lright)); :}
          ;
+
+funcDefList ::= funcDef:f funcDefList:l
+                {: RESULT = new FuncDefList(f, l, loc(fleft, fright)); :}
+            |
+                {: RESULT = null; :}
+            ;
 
 funcDef ::= varDecl:v LPAREN formalDeclList:l RPAREN LBRACKET stmtList:s RBRACKET
             {: RESULT = new FuncDef(v, l, s, loc(vleft, vright)); :}
