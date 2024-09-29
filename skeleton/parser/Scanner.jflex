@@ -65,6 +65,7 @@ white_space = {new_line} | [ \t\f]
 {Identifier} { return symbol("Identifier", IDENT, yytext()); }
 
 /* other tokens (you can add more tokens here) */
+"print"            { return symbol("print",  PRINT); }
 "return"            { return symbol("return",  RET); }
 ";"                 { return symbol(";",  SEMICOL); }
 "if"                { return symbol("if",  IF); }

@@ -106,16 +106,24 @@ public class Interpreter {
     }
 
     Object evaluateStmtList(StmtList stmtList) {
-        if (stmtList == null) {
-            return null;
-        } else {
-            Object stmtResult = evaluateStmt(stmtList.getStmt());
-            return stmtResult;
-        }
+    if (stmtList == null) {
+        return null;
     }
 
+    Object result = evaluateStmt(stmtList.getStmt());
+    if (result != null) {
+        return result;
+    }
+
+    return evaluateStmtList(stmtList.getStmtList());
+}
+
     Object evaluateStmt(Stmt stmt) {
-        if (stmt instanceof ReturnStmt) {
+        if (stmt instanceof PrintStmt) {
+            Object value = evaluateExpr(((PrintStmt)stmt).getExpr());
+            System.out.println(value);
+            return null;
+        } else if (stmt instanceof ReturnStmt) {
             return evaluateExpr(((ReturnStmt)stmt).getExpr());
         } else {
             throw new RuntimeException("Unhandled Stmt type");
