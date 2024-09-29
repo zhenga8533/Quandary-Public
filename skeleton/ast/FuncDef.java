@@ -1,10 +1,14 @@
 package ast;
 
+import java.util.HashMap;
+
 public class FuncDef extends ASTNode {
 
     final VarDecl varDecl;
     final FormalDeclList declList;
     final StmtList stmtList;
+
+    final HashMap<String, Long> varMap = new HashMap<String, Long>();
 
     public FuncDef(VarDecl varDecl, FormalDeclList declList, StmtList stmtList, Location loc) {
         super(loc);
@@ -23,6 +27,10 @@ public class FuncDef extends ASTNode {
 
     public StmtList getStmtList() {
         return stmtList;
+    }
+
+    public HashMap<String, Long> getVarMap() {
+        return varMap;
     }
 
     @Override

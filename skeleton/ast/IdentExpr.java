@@ -1,19 +1,19 @@
 package ast;
 
 public class IdentExpr extends Expr {
-    private final String name;
+    private final String ident;
 
-    public IdentExpr(String name, Location loc) {
+    public IdentExpr(String ident, Location loc) {
         super(loc);
-        this.name = name;
+        this.ident = ident;
     }
 
-    public String getName() {
-        return name;
+    public String getIdent() {
+        return ident;
     }
 
     @Override
     public String toString() {
-        return name;
+        return ident;
     }
 }
