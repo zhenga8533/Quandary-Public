@@ -105,6 +105,8 @@ stmt ::= IF LPAREN cond:c RPAREN stmt:s
             {: RESULT = new PrintStmt(e, loc(eleft, eright)); :}
          |  RET expr:e SEMICOL
             {: RESULT = new ReturnStmt(e, loc(eleft, eright)); :}
+         |  LBRACKET stmtList:l RBRACKET
+            {: RESULT = new BracketStmt(l, loc(lleft, lright)); :}
          ;
 
 expr ::= INTCONST:c

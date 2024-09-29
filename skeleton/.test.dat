@@ -1,0 +1,2 @@
+0 isrefint.q 42         # should fail
+2 sBasicCond.q 42

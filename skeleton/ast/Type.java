@@ -19,7 +19,7 @@ public class Type {
     public String toString() {
         String s = null;
         switch (type) {
-            case INT: s = "Int"; break;
+            case INT: s = "int"; break;
             case REF: s = "Ref"; break;
             case SUPERTYPE: s = "Q"; break;
         }

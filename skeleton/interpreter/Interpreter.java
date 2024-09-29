@@ -103,65 +103,69 @@ public class Interpreter {
 
     Object executeRoot(Program astRoot, long arg) {
         FuncDef mainFunc = astRoot.getFuncDefList().getFunc();
-        return evaluateStmtList(mainFunc.getStmtList());
+        // FormalDeclList declList = mainFunc.getDeclList();
+
+        return evaluateStmtList(mainFunc.getStmtList(), arg);
     }
 
-    Object evaluateStmtList(StmtList stmtList) {
+    Object evaluateStmtList(StmtList stmtList, long arg) {
         if (stmtList == null) {
             return null;
         }
 
-        Object result = evaluateStmt(stmtList.getStmt());
+        Object result = evaluateStmt(stmtList.getStmt(), arg);
         if (result != null) {
             return result;
         }
 
-        return evaluateStmtList(stmtList.getStmtList());
+        return evaluateStmtList(stmtList.getStmtList(), arg);
     }
 
-    Object evaluateStmt(Stmt stmt) {
+    Object evaluateStmt(Stmt stmt, long arg) {
         if (stmt instanceof IfStmt) {
             IfStmt ifStmt = (IfStmt)stmt;
-            if ((Boolean)evaluateCond(ifStmt.getCond())) {
-                return evaluateStmt(ifStmt.getStmt());
+            if ((Boolean)evaluateCond(ifStmt.getCond(), arg)) {
+                return evaluateStmt(ifStmt.getStmt(), arg);
             } else {
                 return null;
             }
         } else if (stmt instanceof IfElseStmt) {
             IfElseStmt ifElseStmt = (IfElseStmt)stmt;
-            if ((Boolean)evaluateCond(ifElseStmt.getCondition())) {
-                return evaluateStmt(ifElseStmt.getThenBlock());
+            if ((Boolean)evaluateCond(ifElseStmt.getCondition(), arg)) {
+                return evaluateStmt(ifElseStmt.getThenBlock(), arg);
             } else {
-                return evaluateStmt(ifElseStmt.getElseBlock());
+                return evaluateStmt(ifElseStmt.getElseBlock(), arg);
             }
         } else if (stmt instanceof PrintStmt) {
-            Object value = evaluateExpr(((PrintStmt)stmt).getExpr());
+            Object value = evaluateExpr(((PrintStmt)stmt).getExpr(), arg);
             System.out.println(value);
             return null;
         } else if (stmt instanceof ReturnStmt) {
-            return evaluateExpr(((ReturnStmt)stmt).getExpr());
+            return evaluateExpr(((ReturnStmt)stmt).getExpr(), arg);
+        } else if (stmt instanceof BracketStmt) {
+            return evaluateStmtList(((BracketStmt)stmt).getStmtList(), arg);
         } else {
             throw new RuntimeException("Unhandled Stmt type");
         }
     }
 
-    Object evaluateExpr(Expr expr) {
+    Object evaluateExpr(Expr expr, long arg) {
         if (expr instanceof ConstExpr) {
             return ((ConstExpr)expr).getValue();
         } else if (expr instanceof IdentExpr) {
-            return ((IdentExpr)expr).getName();
+            return arg;
         } else if (expr instanceof UnaryExpr) {
             UnaryExpr unaryExpr = (UnaryExpr)expr;
             switch (unaryExpr.getOperator()) {
-                case UnaryExpr.NEGATION: return -(Long)evaluateExpr(unaryExpr.getExpr());
+                case UnaryExpr.NEGATION: return -(Long)evaluateExpr(unaryExpr.getExpr(), arg);
                 default: throw new RuntimeException("Unhandled operator");
             }
         } else if (expr instanceof BinaryExpr) {
             BinaryExpr binaryExpr = (BinaryExpr)expr;
             switch (binaryExpr.getOperator()) {
-                case BinaryExpr.PLUS: return (Long)evaluateExpr(binaryExpr.getLeftExpr()) + (Long)evaluateExpr(binaryExpr.getRightExpr());
-                case BinaryExpr.MINUS: return (Long)evaluateExpr(binaryExpr.getLeftExpr()) - (Long)evaluateExpr(binaryExpr.getRightExpr());
-                case BinaryExpr.TIMES: return (Long)evaluateExpr(binaryExpr.getLeftExpr()) * (Long)evaluateExpr(binaryExpr.getRightExpr());
+                case BinaryExpr.PLUS: return (Long)evaluateExpr(binaryExpr.getLeftExpr(), arg) + (Long)evaluateExpr(binaryExpr.getRightExpr(), arg);
+                case BinaryExpr.MINUS: return (Long)evaluateExpr(binaryExpr.getLeftExpr(), arg) - (Long)evaluateExpr(binaryExpr.getRightExpr(), arg);
+                case BinaryExpr.TIMES: return (Long)evaluateExpr(binaryExpr.getLeftExpr(), arg) * (Long)evaluateExpr(binaryExpr.getRightExpr(), arg);
                 default: throw new RuntimeException("Unhandled operator");
             }
         } else {
@@ -169,29 +173,29 @@ public class Interpreter {
         }
     }
 
-    Object evaluateCond(Cond cond) {
+    Object evaluateCond(Cond cond, long arg) {
         if (cond instanceof BinaryCond) {
             BinaryCond binaryCond = (BinaryCond)cond;
             switch (binaryCond.getOperator()) {
-                case BinaryCond.LE: return (Long)evaluateExpr(binaryCond.getLeft()) <= (Long)evaluateExpr(binaryCond.getRight());
-                case BinaryCond.GE: return (Long)evaluateExpr(binaryCond.getLeft()) >= (Long)evaluateExpr(binaryCond.getRight());
-                case BinaryCond.EQ: return evaluateExpr(binaryCond.getLeft()).equals(evaluateExpr(binaryCond.getRight()));
-                case BinaryCond.NE: return !evaluateExpr(binaryCond.getLeft()).equals(evaluateExpr(binaryCond.getRight()));
-                case BinaryCond.LT: return (Long)evaluateExpr(binaryCond.getLeft()) < (Long)evaluateExpr(binaryCond.getRight());
-                case BinaryCond.GT: return (Long)evaluateExpr(binaryCond.getLeft()) > (Long)evaluateExpr(binaryCond.getRight());
+                case BinaryCond.LE: return (Long)evaluateExpr(binaryCond.getLeft(), arg) <= (Long)evaluateExpr(binaryCond.getRight(), arg);
+                case BinaryCond.GE: return (Long)evaluateExpr(binaryCond.getLeft(), arg) >= (Long)evaluateExpr(binaryCond.getRight(), arg);
+                case BinaryCond.EQ: return evaluateExpr(binaryCond.getLeft(), arg).equals(evaluateExpr(binaryCond.getRight(), arg));
+                case BinaryCond.NE: return !evaluateExpr(binaryCond.getLeft(), arg).equals(evaluateExpr(binaryCond.getRight(), arg));
+                case BinaryCond.LT: return (Long)evaluateExpr(binaryCond.getLeft(), arg) < (Long)evaluateExpr(binaryCond.getRight(), arg);
+                case BinaryCond.GT: return (Long)evaluateExpr(binaryCond.getLeft(), arg) > (Long)evaluateExpr(binaryCond.getRight(), arg);
                 default: throw new RuntimeException("Unhandled operator");
             }
         } else if (cond instanceof LogicalCond) {
             LogicalCond logicalCond = (LogicalCond)cond;
             switch (logicalCond.getOperator()) {
-                case LogicalCond.AND: return (Boolean)evaluateCond(logicalCond.getLeft()) && (Boolean)evaluateCond(logicalCond.getRight());
-                case LogicalCond.OR: return (Boolean)evaluateCond(logicalCond.getLeft()) || (Boolean)evaluateCond(logicalCond.getRight());
+                case LogicalCond.AND: return (Boolean)evaluateCond(logicalCond.getLeft(), arg) && (Boolean)evaluateCond(logicalCond.getRight(), arg);
+                case LogicalCond.OR: return (Boolean)evaluateCond(logicalCond.getLeft(), arg) || (Boolean)evaluateCond(logicalCond.getRight(), arg);
                 default: throw new RuntimeException("Unhandled operator");
             }
         } else if (cond instanceof UnaryCond) {
             UnaryCond unaryCond = (UnaryCond)cond;
             switch (unaryCond.getOperator()) {
-                case UnaryCond.NOT: return !(Boolean)evaluateCond(unaryCond.getExpr());
+                case UnaryCond.NOT: return !(Boolean)evaluateCond(unaryCond.getExpr(), arg);
                 default: throw new RuntimeException("Unhandled operator");
             }
         } else {
