@@ -3,3 +3,4 @@ parser/Lexer.java
 parser/sym.java
 parser/Parser.java
 *.tgz
+.test.dat
