@@ -45,6 +45,8 @@ non terminal FormalDeclList   formalDeclList;
 non terminal NeFormalDeclList neFormalDeclList;
 non terminal StmtList         stmtList;
 non terminal Stmt             stmt;
+non terminal ExprList         exprList;
+non terminal NeExprList       neExprList;
 non terminal Expr             expr;
 non terminal BinaryExpr       binaryExpr;
 non terminal Cond             cond;
@@ -103,6 +105,8 @@ stmt ::= varDecl:v EQUAL expr:e SEMICOL
             {: RESULT = new IfStmt(c, s, loc(cleft, cright)); :}
          |  IF LPAREN cond:c RPAREN stmt:t ELSE stmt:e
             {: RESULT = new IfElseStmt(c, t, e, loc(cleft, cright)); :}
+         |  IDENT:i LPAREN exprList:l RPAREN SEMICOL
+            {: RESULT = new CallStmt(i, l, loc(ileft, iright)); :}
          |  PRINT expr:e SEMICOL
             {: RESULT = new PrintStmt(e, loc(eleft, eright)); :}
          |  RET expr:e SEMICOL
@@ -111,15 +115,29 @@ stmt ::= varDecl:v EQUAL expr:e SEMICOL
             {: RESULT = new BracketStmt(l, loc(lleft, lright)); :}
          ;
 
+exprList ::= neExprList:l
+            {: RESULT = new ExprList(l, loc(lleft, lright)); :}
+         |
+            {: RESULT = null; :}
+         ;
+
+neExprList ::= expr:e COMMA neExprList:l
+               {: RESULT = new NeExprList(e, l, loc(eleft, eright)); :}
+            |  expr:e
+               {: RESULT = new NeExprList(e, null, loc(eleft, eright)); :}
+            ;
+
 expr ::= INTCONST:c
          {: RESULT = new ConstExpr(c, loc(cleft, cright)); :}
       |  IDENT:c
          {: RESULT = new IdentExpr(c, loc(cleft, cright)); :}
-      |  binaryExpr:e
-         {: RESULT = e; :}
       |  MINUS expr:e
          {: RESULT = new UnaryExpr(UnaryExpr.NEGATION, e, loc(eleft, eright)); :}
          %prec UMINUS
+      |  IDENT:i LPAREN exprList:l RPAREN
+         {: RESULT = new CallExpr(i, l, loc(ileft, iright)); :}
+      |  binaryExpr:e
+         {: RESULT = e; :}
       |  LPAREN expr:e RPAREN
          {: RESULT = e; :}
       ;
