@@ -112,6 +112,40 @@ public class Interpreter {
         }
     }
 
+    Object executeCall(String name, ExprList exprList, FuncDef func) {
+        FuncDef calledFunc = astRoot.getFuncDefList().findFunc(name);
+
+        // If the function is not defined, try a built-in function
+        if (calledFunc == null) {
+            if (exprList == null) {
+                return callBuiltInFunction(name);
+            }
+
+            NeExprList neExprList = exprList.getNeExprList();
+            Object[] args = new Object[neExprList.size()];
+            int i = 0;
+            while (neExprList != null) {
+                args[i++] = evaluateExpr(neExprList.getExpr(), func);
+                neExprList = neExprList.getNeExprList();
+            }
+            return callBuiltInFunction(name, args);
+        }
+
+        // If the function is defined, evaluate the arguments and call the function
+        HashMap<String, Long> varMap = calledFunc.getVarMap();
+        FormalDeclList formalDeclList = calledFunc.getDeclList();
+        NeFormalDeclList neFormalDeclList = formalDeclList.getDeclList();
+        NeExprList neExprList = exprList.getNeExprList();
+        
+        while (neFormalDeclList != null) {
+            varMap.put(neFormalDeclList.getVarDecl().getIdent(), (Long)evaluateExpr(neExprList.getExpr(), func));
+            neFormalDeclList = neFormalDeclList.getDeclList();
+            neExprList = neExprList.getNeExprList();
+        }
+
+        return evaluateStmtList(calledFunc.getStmtList(), calledFunc);
+    }
+
     Object executeRoot(Program astRoot, long arg) {
         FuncDef mainFunc = astRoot.getFuncDefList().findFunc("main");
 
@@ -160,36 +194,7 @@ public class Interpreter {
             }
         } else if (stmt instanceof CallStmt) {
             CallStmt callStmt = (CallStmt)stmt;
-            FuncDef calledFunc = astRoot.getFuncDefList().findFunc(callStmt.getIdent());
-            if (calledFunc == null) {
-                ExprList exprList = callStmt.getExprList();
-                if (exprList == null) {
-                    return callBuiltInFunction(callStmt.getIdent());
-                }
-
-                NeExprList neExprList = exprList.getNeExprList();
-                Object[] args = new Object[neExprList.size()];
-                int i = 0;
-                while (neExprList != null) {
-                    args[i++] = evaluateExpr(neExprList.getExpr(), func);
-                    neExprList = neExprList.getNeExprList();
-                }
-                return callBuiltInFunction(callStmt.getIdent(), args);
-            }
-
-            HashMap<String, Long> varMap = calledFunc.getVarMap();
-            FormalDeclList formalDeclList = calledFunc.getDeclList();
-            NeFormalDeclList neFormalDeclList = formalDeclList.getDeclList();
-            ExprList exprList = callStmt.getExprList();
-            NeExprList neExprList = exprList.getNeExprList();
-            
-            while (neFormalDeclList != null) {
-                varMap.put(neFormalDeclList.getVarDecl().getIdent(), (Long)evaluateExpr(neExprList.getExpr(), func));
-                neFormalDeclList = neFormalDeclList.getDeclList();
-                neExprList = neExprList.getNeExprList();
-            }
-
-            return evaluateStmtList(calledFunc.getStmtList(), calledFunc);
+            return executeCall(callStmt.getIdent(), callStmt.getExprList(), func);
         } else if (stmt instanceof PrintStmt) {
             Object value = evaluateExpr(((PrintStmt)stmt).getExpr(), func);
             System.out.println(value);
@@ -216,36 +221,7 @@ public class Interpreter {
             }
         } else if (expr instanceof CallExpr) {
             CallExpr callExpr = (CallExpr)expr;
-            FuncDef calledFunc = astRoot.getFuncDefList().findFunc(callExpr.getIdent());
-            if (calledFunc == null) {
-                ExprList exprList = callExpr.getExprList();
-                if (exprList == null) {
-                    return callBuiltInFunction(callExpr.getIdent());
-                }
-
-                NeExprList neExprList = exprList.getNeExprList();
-                Object[] args = new Object[neExprList.size()];
-                int i = 0;
-                while (neExprList != null) {
-                    args[i++] = evaluateExpr(neExprList.getExpr(), func);
-                    neExprList = neExprList.getNeExprList();
-                }
-                return callBuiltInFunction(callExpr.getIdent(), args);
-            }
-
-            HashMap<String, Long> varMap = calledFunc.getVarMap();
-            FormalDeclList formalDeclList = calledFunc.getDeclList();
-            NeFormalDeclList neFormalDeclList = formalDeclList.getDeclList();
-            ExprList exprList = callExpr.getExprList();
-            NeExprList neExprList = exprList.getNeExprList();
-            
-            while (neFormalDeclList != null) {
-                varMap.put(neFormalDeclList.getVarDecl().getIdent(), (Long)evaluateExpr(neExprList.getExpr(), func));
-                neFormalDeclList = neFormalDeclList.getDeclList();
-                neExprList = neExprList.getNeExprList();
-            }
-
-            return evaluateStmtList(calledFunc.getStmtList(), calledFunc);
+            return executeCall(callExpr.getIdent(), callExpr.getExprList(), func);
         } else if (expr instanceof BinaryExpr) {
             BinaryExpr binaryExpr = (BinaryExpr)expr;
             switch (binaryExpr.getOperator()) {
