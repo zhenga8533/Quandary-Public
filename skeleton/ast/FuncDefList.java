@@ -10,6 +10,16 @@ public class FuncDefList extends ASTNode {
         this.funcList = funcList;
     }
 
+    public FuncDef findFunc(String name) {
+        if (func.getVarDecl().getIdent().equals(name)) {
+            return func;
+        } else if (funcList != null) {
+            return funcList.findFunc(name);
+        } else {
+            return null;
+        }
+    }
+
     public FuncDef getFunc() {
         return func;
     }

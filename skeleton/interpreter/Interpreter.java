@@ -103,8 +103,16 @@ public class Interpreter {
         }
     }
 
+    Object callBuiltInFunction(String name, Object[] args) {
+        if (name.equals("randomInt")) {
+            return random.nextInt((int)(long)args[0]);
+        } else {
+            throw new RuntimeException("Unhandled function " + name);
+        }
+    }
+
     Object executeRoot(Program astRoot, long arg) {
-        FuncDef mainFunc = astRoot.getFuncDefList().getFunc();
+        FuncDef mainFunc = astRoot.getFuncDefList().findFunc("main");
 
         HashMap<String, Long> varMap = mainFunc.getVarMap();
         FormalDeclList formalDeclList = mainFunc.getDeclList();
@@ -149,6 +157,22 @@ public class Interpreter {
             } else {
                 return evaluateStmt(ifElseStmt.getElseBlock(), func);
             }
+        } else if (stmt instanceof CallStmt) {
+            CallStmt callStmt = (CallStmt)stmt;
+            FuncDef calledFunc = astRoot.getFuncDefList().findFunc(callStmt.getIdent());
+            HashMap<String, Long> varMap = calledFunc.getVarMap();
+            FormalDeclList formalDeclList = calledFunc.getDeclList();
+            NeFormalDeclList neFormalDeclList = formalDeclList.getDeclList();
+            ExprList exprList = callStmt.getExprList();
+            NeExprList neExprList = exprList.getNeExprList();
+            
+            while (neFormalDeclList != null) {
+                varMap.put(neFormalDeclList.getVarDecl().getIdent(), (Long)evaluateExpr(neExprList.getExpr(), func));
+                neFormalDeclList = neFormalDeclList.getDeclList();
+                neExprList = neExprList.getNeExprList();
+            }
+
+            return evaluateStmtList(calledFunc.getStmtList(), calledFunc);
         } else if (stmt instanceof PrintStmt) {
             Object value = evaluateExpr(((PrintStmt)stmt).getExpr(), func);
             System.out.println(value);
@@ -173,6 +197,22 @@ public class Interpreter {
                 case UnaryExpr.NEGATION: return -(Long)evaluateExpr(unaryExpr.getExpr(), func);
                 default: throw new RuntimeException("Unhandled operator");
             }
+        } else if (expr instanceof CallExpr) {
+            CallExpr callExpr = (CallExpr)expr;
+            FuncDef calledFunc = astRoot.getFuncDefList().findFunc(callExpr.getIdent());
+            HashMap<String, Long> varMap = calledFunc.getVarMap();
+            FormalDeclList formalDeclList = calledFunc.getDeclList();
+            NeFormalDeclList neFormalDeclList = formalDeclList.getDeclList();
+            ExprList exprList = callExpr.getExprList();
+            NeExprList neExprList = exprList.getNeExprList();
+            
+            while (neFormalDeclList != null) {
+                varMap.put(neFormalDeclList.getVarDecl().getIdent(), (Long)evaluateExpr(neExprList.getExpr(), func));
+                neFormalDeclList = neFormalDeclList.getDeclList();
+                neExprList = neExprList.getNeExprList();
+            }
+
+            return evaluateStmtList(calledFunc.getStmtList(), calledFunc);
         } else if (expr instanceof BinaryExpr) {
             BinaryExpr binaryExpr = (BinaryExpr)expr;
             switch (binaryExpr.getOperator()) {
