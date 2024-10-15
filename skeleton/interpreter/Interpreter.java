@@ -103,9 +103,9 @@ public class Interpreter {
         }
     }
 
-    Object callBuiltInFunction(String name, Object[] args) {
+    Object callBuiltInFunction(String name) {
         if (name.equals("randomInt")) {
-            return random.nextInt((int)(long)args[0]);
+            return random.nextInt();
         } else {
             throw new RuntimeException("Unhandled function " + name);
         }
@@ -160,6 +160,10 @@ public class Interpreter {
         } else if (stmt instanceof CallStmt) {
             CallStmt callStmt = (CallStmt)stmt;
             FuncDef calledFunc = astRoot.getFuncDefList().findFunc(callStmt.getIdent());
+            if (calledFunc == null) {
+                return callBuiltInFunction(callStmt.getIdent());
+            }
+
             HashMap<String, Long> varMap = calledFunc.getVarMap();
             FormalDeclList formalDeclList = calledFunc.getDeclList();
             NeFormalDeclList neFormalDeclList = formalDeclList.getDeclList();
@@ -200,6 +204,10 @@ public class Interpreter {
         } else if (expr instanceof CallExpr) {
             CallExpr callExpr = (CallExpr)expr;
             FuncDef calledFunc = astRoot.getFuncDefList().findFunc(callExpr.getIdent());
+            if (calledFunc == null) {
+                return callBuiltInFunction(callExpr.getIdent());
+            }
+
             HashMap<String, Long> varMap = calledFunc.getVarMap();
             FormalDeclList formalDeclList = calledFunc.getDeclList();
             NeFormalDeclList neFormalDeclList = formalDeclList.getDeclList();
