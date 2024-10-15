@@ -106,13 +106,13 @@ public class Interpreter {
     Object callBuiltInFunction(String name, Object... args) {
         if (name.equals("randomInt") && args.length == 1 && args[0] instanceof Long) {
             long arg = (Long) args[0];
-            return random.nextInt((int) arg);
+            return (long) random.nextInt((int) arg);
         } else {
             throw new RuntimeException("Unhandled function " + name);
         }
     }
 
-    Object executeCall(String name, ExprList exprList, FuncDef func) {
+    public Object executeCall(String name, ExprList exprList, FuncDef func) {
         FuncDef calledFunc = astRoot.getFuncDefList().findFunc(name);
 
         // If the function is not defined, try a built-in function
@@ -132,18 +132,23 @@ public class Interpreter {
         }
 
         // If the function is defined, evaluate the arguments and call the function
-        HashMap<String, Long> varMap = calledFunc.getVarMap();
+        HashMap<String, Long> varMap = new HashMap<>(calledFunc.getVarMap());
         FormalDeclList formalDeclList = calledFunc.getDeclList();
-        NeFormalDeclList neFormalDeclList = formalDeclList.getDeclList();
-        NeExprList neExprList = exprList.getNeExprList();
-        
-        while (neFormalDeclList != null) {
-            varMap.put(neFormalDeclList.getVarDecl().getIdent(), (Long)evaluateExpr(neExprList.getExpr(), func));
-            neFormalDeclList = neFormalDeclList.getDeclList();
-            neExprList = neExprList.getNeExprList();
+        if (formalDeclList != null) {
+            NeFormalDeclList neFormalDeclList = formalDeclList.getDeclList();
+            NeExprList neExprList = exprList.getNeExprList();
+            
+            while (neFormalDeclList != null) {
+                varMap.put(neFormalDeclList.getVarDecl().getIdent(), (Long)evaluateExpr(neExprList.getExpr(), func));
+                neFormalDeclList = neFormalDeclList.getDeclList();
+                neExprList = neExprList.getNeExprList();
+            }
         }
 
-        return evaluateStmtList(calledFunc.getStmtList(), calledFunc);
+        // Create a new function for recursion
+        FuncDef newFunc = new FuncDef(calledFunc.getVarDecl(), calledFunc.getDeclList(), calledFunc.getStmtList(), calledFunc.getLocation());
+        newFunc.getVarMap().putAll(varMap);
+        return evaluateStmtList(newFunc.getStmtList(), newFunc);
     }
 
     Object executeRoot(Program astRoot, long arg) {

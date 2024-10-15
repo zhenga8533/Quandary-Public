@@ -33,6 +33,10 @@ public class FuncDef extends ASTNode {
         return varMap;
     }
 
+    public Location getLocation() {
+        return loc;
+    }
+
     @Override
     public String toString() {
         return varDecl.toString() + "(" + declList.toString() + ") " + stmtList.toString();
