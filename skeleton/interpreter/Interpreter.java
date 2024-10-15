@@ -103,9 +103,10 @@ public class Interpreter {
         }
     }
 
-    Object callBuiltInFunction(String name) {
-        if (name.equals("randomInt")) {
-            return random.nextInt();
+    Object callBuiltInFunction(String name, Object... args) {
+        if (name.equals("randomInt") && args.length == 1 && args[0] instanceof Long) {
+            long arg = (Long) args[0];
+            return random.nextInt((int) arg);
         } else {
             throw new RuntimeException("Unhandled function " + name);
         }
@@ -161,7 +162,19 @@ public class Interpreter {
             CallStmt callStmt = (CallStmt)stmt;
             FuncDef calledFunc = astRoot.getFuncDefList().findFunc(callStmt.getIdent());
             if (calledFunc == null) {
-                return callBuiltInFunction(callStmt.getIdent());
+                ExprList exprList = callStmt.getExprList();
+                if (exprList == null) {
+                    return callBuiltInFunction(callStmt.getIdent());
+                }
+
+                NeExprList neExprList = exprList.getNeExprList();
+                Object[] args = new Object[neExprList.size()];
+                int i = 0;
+                while (neExprList != null) {
+                    args[i++] = evaluateExpr(neExprList.getExpr(), func);
+                    neExprList = neExprList.getNeExprList();
+                }
+                return callBuiltInFunction(callStmt.getIdent(), args);
             }
 
             HashMap<String, Long> varMap = calledFunc.getVarMap();
@@ -205,7 +218,19 @@ public class Interpreter {
             CallExpr callExpr = (CallExpr)expr;
             FuncDef calledFunc = astRoot.getFuncDefList().findFunc(callExpr.getIdent());
             if (calledFunc == null) {
-                return callBuiltInFunction(callExpr.getIdent());
+                ExprList exprList = callExpr.getExprList();
+                if (exprList == null) {
+                    return callBuiltInFunction(callExpr.getIdent());
+                }
+
+                NeExprList neExprList = exprList.getNeExprList();
+                Object[] args = new Object[neExprList.size()];
+                int i = 0;
+                while (neExprList != null) {
+                    args[i++] = evaluateExpr(neExprList.getExpr(), func);
+                    neExprList = neExprList.getNeExprList();
+                }
+                return callBuiltInFunction(callExpr.getIdent(), args);
             }
 
             HashMap<String, Long> varMap = calledFunc.getVarMap();

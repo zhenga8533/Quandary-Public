@@ -10,6 +10,14 @@ public class NeExprList extends ASTNode {
         this.neExprList = neExprList;
     }
 
+    public int size() {
+        if (neExprList == null) {
+            return 1;
+        } else {
+            return 1 + neExprList.size();
+        }
+    }
+
     public Expr getExpr() {
         return expr;
     }
