@@ -73,6 +73,7 @@ white_space = {new_line} | [ \t\f]
 "="                 { return symbol("=", EQUAL); }
 ","                 { return symbol(",", COMMA); }
 "int"               { return symbol("int",  INT); }
+"mutable"           { return symbol("mutable", MUTABLE); }
 
 {Identifier} { return symbol("Identifier", IDENT, yytext()); }
 

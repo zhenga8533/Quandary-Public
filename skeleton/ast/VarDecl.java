@@ -4,9 +4,11 @@ public class VarDecl extends ASTNode {
 
     final Type type;
     final String ident;
+    final boolean mutable;
 
-    public VarDecl(Type type, String ident, Location loc) {
+    public VarDecl(boolean mutable, Type type, String ident, Location loc) {
         super(loc);
+        this.mutable = mutable;
         this.type = type;
         this.ident = ident;
     }

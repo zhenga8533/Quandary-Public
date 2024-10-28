@@ -28,7 +28,7 @@ parser code {:
 :};
 
 terminal RET, SEMICOL, LBRACKET, RBRACKET;
-terminal PRINT, IF, ELSE, COMMA, EQUAL;
+terminal PRINT, IF, ELSE, COMMA, EQUAL, MUTABLE;
 terminal PLUS, MINUS, TIMES, UMINUS, LPAREN, RPAREN;
 terminal LE, GE, EQ, NE, LT, GT, AND, OR, NOT;
 terminal Long INTCONST;
@@ -74,7 +74,9 @@ funcDef ::= varDecl:v LPAREN formalDeclList:l RPAREN LBRACKET stmtList:s RBRACKE
          ;
 
 varDecl ::= type:t IDENT:i
-            {: RESULT = new VarDecl(t, i, loc(tleft, tright)); :}
+            {: RESULT = new VarDecl(false, t, i, loc(tleft, tright)); :}
+         |  MUTABLE type:t IDENT:i
+            {: RESULT = new VarDecl(true, t, i, loc(tleft, tright)); :}
          ;
 
 type ::= INT
