@@ -9,7 +9,7 @@ do_one_test() {
     echo -n "Testing $OPTIONS $PROGRAM $INPUT, worth $POINTS points: "
     # Compare the last line if process returns nonzero code; otherwise compare last two lines
 
-    # Uncomment to see reference interpreter output only:
+    #Uncomment to see reference interpreter output only:
     # echo ""
     # $REF_IMPL $OPTIONS $TESTCASE_DIR/$PROGRAM $INPUT
     # echo ""
