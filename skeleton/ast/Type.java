@@ -3,7 +3,7 @@ package ast;
 public class Type {
     public static final int INT = 0;
     public static final int REF = 1;
-    public static final int SUPERTYPE = 2;
+    public static final int Q = 2;
 
     private final int type;
 
@@ -21,7 +21,7 @@ public class Type {
         switch (type) {
             case INT: s = "int"; break;
             case REF: s = "Ref"; break;
-            case SUPERTYPE: s = "Q"; break;
+            case Q: s = "Q"; break;
         }
         return s;
     }

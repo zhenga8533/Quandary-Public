@@ -66,15 +66,17 @@ white_space = {new_line} | [ \t\f]
 /* other tokens (you can add more tokens here) */
 "print"            { return symbol("print",  PRINT); }
 "if"                { return symbol("if",  IF); }
-"else"              { return symbol("else", ELSE); }
-"while"             { return symbol("while", WHILE); }
+"else"              { return symbol("else",  ELSE); }
+"while"             { return symbol("while",  WHILE); }
 "return"            { return symbol("return",  RET); }
 ";"                 { return symbol(";",  SEMICOL); }
+"="                 { return symbol("=",  EQUAL); }
+","                 { return symbol(",",  COMMA); }
 
-"="                 { return symbol("=", EQUAL); }
-","                 { return symbol(",", COMMA); }
 "int"               { return symbol("int",  INT); }
-"mutable"           { return symbol("mutable", MUTABLE); }
+"Ref"               { return symbol("Ref",  REF); }
+"Q"                 { return symbol("Q",  Q); }
+"mutable"           { return symbol("mutable",  MUTABLE); }
 
 {Identifier} { return symbol("Identifier", IDENT, yytext()); }
 
@@ -86,14 +88,14 @@ white_space = {new_line} | [ \t\f]
 "{"                 { return symbol("{",  LBRACKET); }
 "}"                 { return symbol("}",  RBRACKET); }
 
-"<="                { return symbol("<=", LE); }
-">="                { return symbol(">=", GE); }
-"=="                { return symbol("==", EQ); }
-"!="                { return symbol("!=", NE); }
+"<="                { return symbol("<=",  LE); }
+">="                { return symbol(">=",  GE); }
+"=="                { return symbol("==",  EQ); }
+"!="                { return symbol("!=",  NE); }
 "<"                 { return symbol("<",  LT); }
 ">"                 { return symbol(">",  GT); }
-"&&"                { return symbol("&&", AND); }
-"||"                { return symbol("||", OR); }
+"&&"                { return symbol("&&",  AND); }
+"||"                { return symbol("||",  OR); }
 "!"                 { return symbol("!",  NOT); }
 
 /* You shouldn't need to modify anything below this */

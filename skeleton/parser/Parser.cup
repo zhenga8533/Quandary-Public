@@ -33,8 +33,7 @@ terminal PLUS, MINUS, TIMES, UMINUS, LPAREN, RPAREN;
 terminal LE, GE, EQ, NE, LT, GT, AND, OR, NOT;
 terminal Long INTCONST;
 terminal String IDENT;
-
-terminal INT;
+terminal INT, REF, Q;
 
 non terminal Program          program;
 non terminal FuncDefList      funcDefList;
@@ -81,6 +80,10 @@ varDecl ::= type:t IDENT:i
 
 type ::= INT
          {: RESULT = new Type(Type.INT); :}
+      |  REF
+         {: RESULT = new Type(Type.REF); :}
+      |  Q
+         {: RESULT = new Type(Type.Q); :}
       ;
 
 formalDeclList ::= neFormalDeclList:l
