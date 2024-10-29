@@ -217,18 +217,24 @@ public class Interpreter {
             return null;
         } else if (stmt instanceof IfStmt) {
             IfStmt ifStmt = (IfStmt)stmt;
-            if ((Boolean)evaluateCond(ifStmt.getCond(), func)) {
+            if (evaluateCond(ifStmt.getCond(), func)) {
                 return evaluateStmt(ifStmt.getStmt(), func);
             } else {
                 return null;
             }
         } else if (stmt instanceof IfElseStmt) {
             IfElseStmt ifElseStmt = (IfElseStmt)stmt;
-            if ((Boolean)evaluateCond(ifElseStmt.getCondition(), func)) {
+            if (evaluateCond(ifElseStmt.getCondition(), func)) {
                 return evaluateStmt(ifElseStmt.getThenBlock(), func);
             } else {
                 return evaluateStmt(ifElseStmt.getElseBlock(), func);
             }
+        } else if (stmt instanceof WhileStmt) {
+            WhileStmt whileStmt = (WhileStmt)stmt;
+            while (evaluateCond(whileStmt.getCond(), func)) {
+                evaluateStmt(whileStmt.getStmt(), func);
+            }
+            return null;
         } else if (stmt instanceof CallStmt) {
             CallStmt callStmt = (CallStmt)stmt;
             return executeCall(callStmt.getIdent(), callStmt.getExprList(), func);
@@ -282,7 +288,7 @@ public class Interpreter {
         }
     }
 
-    Object evaluateCond(Cond cond, FuncDef func) {
+    Boolean evaluateCond(Cond cond, FuncDef func) {
         if (cond instanceof BinaryCond) {
             BinaryCond binaryCond = (BinaryCond)cond;
             switch (binaryCond.getOperator()) {
@@ -297,14 +303,14 @@ public class Interpreter {
         } else if (cond instanceof LogicalCond) {
             LogicalCond logicalCond = (LogicalCond)cond;
             switch (logicalCond.getOperator()) {
-                case LogicalCond.AND: return (Boolean)evaluateCond(logicalCond.getLeft(), func) && (Boolean)evaluateCond(logicalCond.getRight(), func);
-                case LogicalCond.OR: return (Boolean)evaluateCond(logicalCond.getLeft(), func) || (Boolean)evaluateCond(logicalCond.getRight(), func);
+                case LogicalCond.AND: return evaluateCond(logicalCond.getLeft(), func) && evaluateCond(logicalCond.getRight(), func);
+                case LogicalCond.OR: return evaluateCond(logicalCond.getLeft(), func) || evaluateCond(logicalCond.getRight(), func);
                 default: throw new RuntimeException("Unhandled operator");
             }
         } else if (cond instanceof UnaryCond) {
             UnaryCond unaryCond = (UnaryCond)cond;
             switch (unaryCond.getOperator()) {
-                case UnaryCond.NOT: return !(Boolean)evaluateCond(unaryCond.getExpr(), func);
+                case UnaryCond.NOT: return !evaluateCond(unaryCond.getExpr(), func);
                 default: throw new RuntimeException("Unhandled operator");
             }
         } else {
