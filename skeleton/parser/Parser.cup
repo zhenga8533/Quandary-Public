@@ -28,7 +28,7 @@ parser code {:
 :};
 
 terminal RET, SEMICOL, LBRACKET, RBRACKET;
-terminal PRINT, IF, ELSE, COMMA, EQUAL, MUTABLE;
+terminal PRINT, IF, ELSE, WHILE, COMMA, EQUAL, MUTABLE;
 terminal PLUS, MINUS, TIMES, UMINUS, LPAREN, RPAREN;
 terminal LE, GE, EQ, NE, LT, GT, AND, OR, NOT;
 terminal Long INTCONST;
