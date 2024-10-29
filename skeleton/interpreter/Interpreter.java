@@ -132,14 +132,20 @@ public class Interpreter {
         }
 
         // If the function is defined, evaluate the arguments and call the function
-        HashMap<String, Long> varMap = new HashMap<>(calledFunc.getVarMap());
+        HashMap<String, Long> mutableMap = new HashMap<>(calledFunc.getMutableMap());
+        HashMap<String, Long> immutableMap = calledFunc.getImmutableMap();
         FormalDeclList formalDeclList = calledFunc.getDeclList();
         if (formalDeclList != null) {
             NeFormalDeclList neFormalDeclList = formalDeclList.getDeclList();
             NeExprList neExprList = exprList.getNeExprList();
             
             while (neFormalDeclList != null) {
-                varMap.put(neFormalDeclList.getVarDecl().getIdent(), (Long)evaluateExpr(neExprList.getExpr(), func));
+                VarDecl varDecl = neFormalDeclList.getVarDecl();
+                if (varDecl.isMutable()) {
+                    mutableMap.put(varDecl.getIdent(), (Long)evaluateExpr(neExprList.getExpr(), func));
+                } else {
+                    immutableMap.put(varDecl.getIdent(), (Long)evaluateExpr(neExprList.getExpr(), func));
+                }
                 neFormalDeclList = neFormalDeclList.getDeclList();
                 neExprList = neExprList.getNeExprList();
             }
@@ -147,18 +153,25 @@ public class Interpreter {
 
         // Create a new function for recursion
         FuncDef newFunc = new FuncDef(calledFunc.getVarDecl(), calledFunc.getDeclList(), calledFunc.getStmtList(), calledFunc.getLocation());
-        newFunc.getVarMap().putAll(varMap);
+        newFunc.getMutableMap().putAll(mutableMap);
+        newFunc.getImmutableMap().putAll(immutableMap);
         return evaluateStmtList(newFunc.getStmtList(), newFunc);
     }
 
     Object executeRoot(Program astRoot, long arg) {
         FuncDef mainFunc = astRoot.getFuncDefList().findFunc("main");
-
-        HashMap<String, Long> varMap = mainFunc.getVarMap();
+        HashMap<String, Long> mutableMap = mainFunc.getMutableMap();
+        HashMap<String, Long> immutableMap = mainFunc.getImmutableMap();
+        
         FormalDeclList formalDeclList = mainFunc.getDeclList();
         NeFormalDeclList neFormalDeclList = formalDeclList.getDeclList();
         while (neFormalDeclList != null) {
-            varMap.put(neFormalDeclList.getVarDecl().getIdent(), arg);
+            VarDecl varDecl = neFormalDeclList.getVarDecl();
+            if (varDecl.isMutable()) {
+                mutableMap.put(varDecl.getIdent(), arg);
+            } else {
+                immutableMap.put(varDecl.getIdent(), arg);
+            }
             neFormalDeclList = neFormalDeclList.getDeclList();
         }
 
@@ -181,7 +194,26 @@ public class Interpreter {
     Object evaluateStmt(Stmt stmt, FuncDef func) {
         if (stmt instanceof DeclStmt) {
             DeclStmt declStmt = (DeclStmt)stmt;
-            func.getVarMap().put(declStmt.getVarDecl().getIdent(), (Long)evaluateExpr(declStmt.getExpr(), func));
+            VarDecl varDecl = declStmt.getVarDecl();
+            String ident = varDecl.getIdent();
+            Object value = evaluateExpr(declStmt.getExpr(), func);
+            if (varDecl.isMutable()) {
+                func.getMutableMap().put(ident, (Long)value);
+            } else {
+                func.getImmutableMap().put(ident, (Long)value);
+            }
+            return null;
+        } else if (stmt instanceof UpdateStmt) {
+            UpdateStmt updateStmt = (UpdateStmt)stmt;
+            String ident = updateStmt.getIdent();
+            Object value = evaluateExpr(updateStmt.getExpr(), func);
+            if (func.getMutableMap().containsKey(ident)) {
+                func.getMutableMap().put(ident, (Long)value);
+            } else if (func.getImmutableMap().containsKey(ident)) {
+                throw new RuntimeException("Immutable variable cannot be updated: " + ident);
+            } else {
+                throw new RuntimeException("Variable not found: " + ident);
+            }
             return null;
         } else if (stmt instanceof IfStmt) {
             IfStmt ifStmt = (IfStmt)stmt;
@@ -217,7 +249,17 @@ public class Interpreter {
         if (expr instanceof ConstExpr) {
             return ((ConstExpr)expr).getValue();
         } else if (expr instanceof IdentExpr) {
-            return func.getVarMap().get(((IdentExpr)expr).getIdent());
+            IdentExpr identExpr = (IdentExpr)expr;
+            HashMap<String, Long> mutableMap = func.getMutableMap();
+            HashMap<String, Long> immutableMap = func.getImmutableMap();
+
+            if (mutableMap.containsKey(identExpr.getIdent())) {
+                return mutableMap.get(identExpr.getIdent());
+            } else if (immutableMap.containsKey(identExpr.getIdent())) {
+                return immutableMap.get(identExpr.getIdent());
+            } else {
+                throw new RuntimeException("Variable not found: " + identExpr.getIdent());
+            }
         } else if (expr instanceof UnaryExpr) {
             UnaryExpr unaryExpr = (UnaryExpr)expr;
             switch (unaryExpr.getOperator()) {

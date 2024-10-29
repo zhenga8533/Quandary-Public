@@ -21,6 +21,10 @@ public class VarDecl extends ASTNode {
         return ident;
     }
 
+    public boolean isMutable() {
+        return mutable;
+    }
+
     @Override
     public String toString() {
         return type.toString() + " " + ident;
