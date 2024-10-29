@@ -8,8 +8,9 @@ public class FuncDef extends ASTNode {
     final FormalDeclList declList;
     final StmtList stmtList;
 
-    final HashMap<String, Long> mutableMap = new HashMap<String, Long>();
-    final HashMap<String, Long> immutableMap = new HashMap<String, Long>();
+    final HashMap<String, Object> mutableMap = new HashMap<String, Object>();
+    final HashMap<String, Object> immutableMap = new HashMap<String, Object>();
+    final HashMap<String, String> typeMap = new HashMap<String, String>();
 
     public FuncDef(VarDecl varDecl, FormalDeclList declList, StmtList stmtList, Location loc) {
         super(loc);
@@ -30,12 +31,16 @@ public class FuncDef extends ASTNode {
         return stmtList;
     }
 
-    public HashMap<String, Long> getMutableMap() {
+    public HashMap<String, Object> getMutableMap() {
         return mutableMap;
     }
 
-    public HashMap<String, Long> getImmutableMap() {
+    public HashMap<String, Object> getImmutableMap() {
         return immutableMap;
+    }
+
+    public HashMap<String, String> getTypeMap() {
+        return typeMap;
     }
 
     public Location getLocation() {

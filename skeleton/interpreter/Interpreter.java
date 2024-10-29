@@ -132,8 +132,9 @@ public class Interpreter {
         }
 
         // If the function is defined, evaluate the arguments and call the function
-        HashMap<String, Long> mutableMap = new HashMap<>(calledFunc.getMutableMap());
-        HashMap<String, Long> immutableMap = calledFunc.getImmutableMap();
+        HashMap<String, Object> mutableMap = new HashMap<>(calledFunc.getMutableMap());
+        HashMap<String, Object> immutableMap = calledFunc.getImmutableMap();
+        HashMap<String, String> typeMap = calledFunc.getTypeMap();
         FormalDeclList formalDeclList = calledFunc.getDeclList();
         if (formalDeclList != null) {
             NeFormalDeclList neFormalDeclList = formalDeclList.getDeclList();
@@ -146,6 +147,7 @@ public class Interpreter {
                 } else {
                     immutableMap.put(varDecl.getIdent(), (Long)evaluateExpr(neExprList.getExpr(), func));
                 }
+                typeMap.put(varDecl.getIdent(), varDecl.getType().toString());
                 neFormalDeclList = neFormalDeclList.getDeclList();
                 neExprList = neExprList.getNeExprList();
             }
@@ -155,13 +157,15 @@ public class Interpreter {
         FuncDef newFunc = new FuncDef(calledFunc.getVarDecl(), calledFunc.getDeclList(), calledFunc.getStmtList(), calledFunc.getLocation());
         newFunc.getMutableMap().putAll(mutableMap);
         newFunc.getImmutableMap().putAll(immutableMap);
+        newFunc.getTypeMap().putAll(typeMap);
         return evaluateStmtList(newFunc.getStmtList(), newFunc);
     }
 
     Object executeRoot(Program astRoot, long arg) {
         FuncDef mainFunc = astRoot.getFuncDefList().findFunc("main");
-        HashMap<String, Long> mutableMap = mainFunc.getMutableMap();
-        HashMap<String, Long> immutableMap = mainFunc.getImmutableMap();
+        HashMap<String, Object> mutableMap = mainFunc.getMutableMap();
+        HashMap<String, Object> immutableMap = mainFunc.getImmutableMap();
+        HashMap<String, String> typeMap = mainFunc.getTypeMap();
         
         FormalDeclList formalDeclList = mainFunc.getDeclList();
         NeFormalDeclList neFormalDeclList = formalDeclList.getDeclList();
@@ -172,6 +176,7 @@ public class Interpreter {
             } else {
                 immutableMap.put(varDecl.getIdent(), arg);
             }
+            typeMap.put(varDecl.getIdent(), varDecl.getType().toString());
             neFormalDeclList = neFormalDeclList.getDeclList();
         }
 
@@ -202,6 +207,7 @@ public class Interpreter {
             } else {
                 func.getImmutableMap().put(ident, (Long)value);
             }
+            func.getTypeMap().put(ident, varDecl.getType().toString());
             return null;
         } else if (stmt instanceof UpdateStmt) {
             UpdateStmt updateStmt = (UpdateStmt)stmt;
@@ -256,8 +262,8 @@ public class Interpreter {
             return ((ConstExpr)expr).getValue();
         } else if (expr instanceof IdentExpr) {
             IdentExpr identExpr = (IdentExpr)expr;
-            HashMap<String, Long> mutableMap = func.getMutableMap();
-            HashMap<String, Long> immutableMap = func.getImmutableMap();
+            HashMap<String, Object> mutableMap = func.getMutableMap();
+            HashMap<String, Object> immutableMap = func.getImmutableMap();
 
             if (mutableMap.containsKey(identExpr.getIdent())) {
                 return mutableMap.get(identExpr.getIdent());
