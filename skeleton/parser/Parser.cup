@@ -103,10 +103,14 @@ stmtList ::= stmt:s stmtList:l
 
 stmt ::= varDecl:v EQUAL expr:e SEMICOL
             {: RESULT = new DeclStmt(v, e, loc(vleft, vright)); :}
+         |  IDENT:i EQUAL expr:e SEMICOL
+            {: RESULT = new UpdateStmt(i, e, loc(ileft, iright)); :}
          |  IF LPAREN cond:c RPAREN stmt:s
             {: RESULT = new IfStmt(c, s, loc(cleft, cright)); :}
          |  IF LPAREN cond:c RPAREN stmt:t ELSE stmt:e
             {: RESULT = new IfElseStmt(c, t, e, loc(cleft, cright)); :}
+         |  WHILE LPAREN cond:c RPAREN stmt:s
+            {: RESULT = new WhileStmt(c, s, loc(cleft, cright)); :}
          |  IDENT:i LPAREN exprList:l RPAREN SEMICOL
             {: RESULT = new CallStmt(i, l, loc(ileft, iright)); :}
          |  PRINT expr:e SEMICOL
