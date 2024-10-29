@@ -107,6 +107,20 @@ public class Interpreter {
         if (name.equals("randomInt") && args.length == 1 && args[0] instanceof Long) {
             long arg = (Long) args[0];
             return (long) random.nextInt((int) arg);
+        } else if (name.equals("isAtom") && args.length == 1) {
+            Object arg = args[0];
+            if (arg instanceof Long || arg == null) {
+                return 1;
+            } else {
+                return 0;
+            }
+        } else if (name.equals("isNil") && args.length == 1) {
+            Object arg = args[0];
+            if (arg == null) {
+                return 1;
+            } else {
+                return 0;
+            }
         } else {
             throw new RuntimeException("Unhandled function " + name);
         }
@@ -258,7 +272,9 @@ public class Interpreter {
     }
 
     Object evaluateExpr(Expr expr, FuncDef func) {
-        if (expr instanceof ConstExpr) {
+        if (expr instanceof NilExpr) {
+            return null;
+        } else if (expr instanceof ConstExpr) {
             return ((ConstExpr)expr).getValue();
         } else if (expr instanceof IdentExpr) {
             IdentExpr identExpr = (IdentExpr)expr;

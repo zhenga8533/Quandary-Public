@@ -33,7 +33,7 @@ terminal PLUS, MINUS, TIMES, UMINUS, LPAREN, RPAREN;
 terminal LE, GE, EQ, NE, LT, GT, AND, OR, NOT;
 terminal Long INTCONST;
 terminal String IDENT;
-terminal INT, REF, Q;
+terminal INT, REF, Q, NIL;
 
 non terminal Program          program;
 non terminal FuncDefList      funcDefList;
@@ -136,7 +136,9 @@ neExprList ::= expr:e COMMA neExprList:l
                {: RESULT = new NeExprList(e, null, loc(eleft, eright)); :}
             ;
 
-expr ::= INTCONST:c
+expr ::= NIL:n
+         {: RESULT = new NilExpr(loc(nleft, nright)); :}
+      |  INTCONST:c
          {: RESULT = new ConstExpr(c, loc(cleft, cright)); :}
       |  IDENT:c
          {: RESULT = new IdentExpr(c, loc(cleft, cright)); :}

@@ -77,6 +77,7 @@ white_space = {new_line} | [ \t\f]
 "Ref"               { return symbol("Ref",  REF); }
 "Q"                 { return symbol("Q",  Q); }
 "mutable"           { return symbol("mutable",  MUTABLE); }
+"nil"               { return symbol("nil",  NIL); }
 
 {Identifier} { return symbol("Identifier", IDENT, yytext()); }
 
