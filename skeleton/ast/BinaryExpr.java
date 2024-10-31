@@ -5,10 +5,11 @@ public class BinaryExpr extends Expr {
     public static final int PLUS = 1;
     public static final int MINUS = 2;
     public static final int TIMES = 3;
+    public static final int PERIOD = 4;
 
-    final Expr expr1;
+    Expr expr1;
     final int operator;
-    final Expr expr2;
+    Expr expr2;
 
     public BinaryExpr(Expr expr1, int operator, Expr expr2, Location loc) {
         super(loc);
@@ -36,7 +37,8 @@ public class BinaryExpr extends Expr {
             case PLUS:  s = "+"; break;
             case MINUS: s = "-"; break;
             case TIMES: s= "*"; break;
+            case PERIOD: s = "."; break;
         }
-        return "(" + expr1 + " " + s + " " + expr2 + ")";
+        return "(" + expr1.toString() + " " + s + " " + expr2.toString() + ")";
     }
 }

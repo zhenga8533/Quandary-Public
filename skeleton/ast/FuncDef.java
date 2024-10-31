@@ -1,5 +1,6 @@
 package ast;
 
+import var.*;
 import java.util.HashMap;
 
 public class FuncDef extends ASTNode {
@@ -8,8 +9,8 @@ public class FuncDef extends ASTNode {
     final FormalDeclList declList;
     final StmtList stmtList;
 
-    final HashMap<String, Object> mutableMap = new HashMap<String, Object>();
-    final HashMap<String, Object> immutableMap = new HashMap<String, Object>();
+    final HashMap<String, Q> mutableMap = new HashMap<String, Q>();
+    final HashMap<String, Q> immutableMap = new HashMap<String, Q>();
     final HashMap<String, String> typeMap = new HashMap<String, String>();
 
     public FuncDef(VarDecl varDecl, FormalDeclList declList, StmtList stmtList, Location loc) {
@@ -31,11 +32,11 @@ public class FuncDef extends ASTNode {
         return stmtList;
     }
 
-    public HashMap<String, Object> getMutableMap() {
+    public HashMap<String, Q> getMutableMap() {
         return mutableMap;
     }
 
-    public HashMap<String, Object> getImmutableMap() {
+    public HashMap<String, Q> getImmutableMap() {
         return immutableMap;
     }
 

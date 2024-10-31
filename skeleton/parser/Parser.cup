@@ -28,7 +28,7 @@ parser code {:
 :};
 
 terminal RET, SEMICOL, LBRACKET, RBRACKET;
-terminal PRINT, IF, ELSE, WHILE, COMMA, EQUAL, MUTABLE;
+terminal PRINT, IF, ELSE, WHILE, COMMA, PERIOD, EQUAL, MUTABLE;
 terminal PLUS, MINUS, TIMES, UMINUS, LPAREN, RPAREN;
 terminal LE, GE, EQ, NE, LT, GT, AND, OR, NOT;
 terminal Long INTCONST;
@@ -51,6 +51,7 @@ non terminal BinaryExpr       binaryExpr;
 non terminal Cond             cond;
 
 precedence left IF, ELSE;
+precedence left PERIOD;
 precedence left PLUS, MINUS;
 precedence left TIMES;
 precedence left UMINUS;
@@ -145,6 +146,8 @@ expr ::= NIL:n
       |  MINUS expr:e
          {: RESULT = new UnaryExpr(UnaryExpr.NEGATION, e, loc(eleft, eright)); :}
          %prec UMINUS
+      |  LPAREN type:t RPAREN expr:e
+         {: RESULT = new TypecastExpr(t, e, loc(tleft, tright)); :}
       |  IDENT:i LPAREN exprList:l RPAREN
          {: RESULT = new CallExpr(i, l, loc(ileft, iright)); :}
       |  binaryExpr:e
@@ -159,6 +162,8 @@ binaryExpr ::= expr:e1 PLUS expr:e2
                {: RESULT = new BinaryExpr(e1, BinaryExpr.MINUS, e2, loc(e1left, e1right)); :}
             |  expr:e1 TIMES expr:e2
                {: RESULT = new BinaryExpr(e1, BinaryExpr.TIMES, e2, loc(e1left, e1right)); :}
+            |  expr:e1 PERIOD expr: e2
+               {: RESULT = new BinaryExpr(e1, BinaryExpr.PERIOD, e2, loc(e1left, e2left)); :}
             ;
 
 cond ::= expr:e1 LE expr:e2

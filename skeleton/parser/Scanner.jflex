@@ -72,6 +72,7 @@ white_space = {new_line} | [ \t\f]
 ";"                 { return symbol(";",  SEMICOL); }
 "="                 { return symbol("=",  EQUAL); }
 ","                 { return symbol(",",  COMMA); }
+"."                 { return symbol(".",  PERIOD); }
 
 "int"               { return symbol("int",  INT); }
 "Ref"               { return symbol("Ref",  REF); }
