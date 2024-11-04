@@ -21,6 +21,9 @@ public class StmtList extends ASTNode {
 
     @Override
     public String toString() {
+        if (stmtList == null) {
+            return stmt.toString();
+        }
         return stmt.toString() + " " + stmtList.toString();
     }
 }

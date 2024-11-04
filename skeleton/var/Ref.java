@@ -26,6 +26,10 @@ public class Ref extends Q {
     }
 
     public String toString() {
+        if (left == null && right == null) {
+            return "nil";
+        }
+        
         String l = left == null ? "nil" : left.toString();
         String r = right == null ? "nil" : right.toString();
         return "(" + l + " . " + r + ")";

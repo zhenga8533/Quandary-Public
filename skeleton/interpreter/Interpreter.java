@@ -104,46 +104,53 @@ public class Interpreter {
         }
     }
 
-    Q callBuiltInFunction(String name, FuncDef func, Q... args) {
+    Q callBuiltInFunction(String name, Q... args) {
         if (name.equals("randomInt") && args.length == 1) {
             int value = (int) ((Int)args[0]).getValue();
             return new Int(random.nextInt(value));
+        } else if (name.equals("left") && args.length == 1) {
+            return ((Ref)args[0]).getLeft();
+        } else if (name.equals("right") && args.length == 1) {
+            return ((Ref)args[0]).getRight();
         } else if (name.equals("isAtom") && args.length == 1) {
-            if (args[0] instanceof Int || args[0] == null) {
+            if (args[0] instanceof Int) {
                 return new Int(1);
+            } else if (args[0] instanceof Ref) {
+                Ref ref = (Ref)args[0];
+                return new Int(ref.getLeft() == null && ref.getRight() == null ? 1 : 0);
             } else {
                 return new Int(0);
             }
         } else if (name.equals("isNil") && args.length == 1) {
-            if (args[0] == null) {
-                return new Int(1);
+            if (args[0] instanceof Int) {
+                return new Int(0);
+            } else if (args[0] instanceof Ref) {
+                Ref ref = (Ref)args[0];
+                return new Int(ref.getLeft() == null && ref.getRight() == null ? 1 : 0);
             } else {
                 return new Int(0);
             }
         } else if (name.equals("setLeft") && args.length == 2) {
             Ref ref = (Ref)args[0];
             ref.setLeft(args[1]);
-            return null;
+            return new Int(1);
         } else if (name.equals("setRight") && args.length == 2) {
             Ref ref = (Ref)args[0];
             ref.setRight(args[1]);
-            return null;
+            return new Int(1);
         } else {
             throw new RuntimeException("Unhandled function " + name);
         }
     }
 
-    public Q executeCall(String name, ExprList exprList, FuncDef func) {
+    Q executeCall(String name, ExprList exprList, FuncDef func) {
         FuncDef calledFunc = astRoot.getFuncDefList().findFunc(name);
 
         // If the function is not defined, try a built-in function
         if (calledFunc == null) {
             if (exprList == null) {
-                return callBuiltInFunction(name, func);
+                return callBuiltInFunction(name);
             }
-
-            HashMap<String, Q> mutableMap = func.getMutableMap();
-            HashMap<String, Q> immutableMap = func.getImmutableMap();
 
             NeExprList neExprList = exprList.getNeExprList();
             Q[] args = new Q[neExprList.size()];
@@ -152,37 +159,37 @@ public class Interpreter {
                 args[i++] = evaluateExpr(neExprList.getExpr(), func);
                 neExprList = neExprList.getNeExprList();
             }
-            return callBuiltInFunction(name, func, args);
+            return callBuiltInFunction(name, args);
         }
 
-        // If the function is defined, evaluate the arguments and call the function
-        HashMap<String, Q> mutableMap = new HashMap<>(calledFunc.getMutableMap());
-        HashMap<String, Q> immutableMap = calledFunc.getImmutableMap();
-        HashMap<String, String> typeMap = calledFunc.getTypeMap();
+        // If the function is defined, execute it
+        HashMap<String, Q> mutableMap = new HashMap<String, Q>();
+        HashMap<String, Q> immutableMap = new HashMap<String, Q>();
+        HashMap<String, String> typeMap = new HashMap<String, String>();
+
         FormalDeclList formalDeclList = calledFunc.getDeclList();
-        if (formalDeclList != null) {
-            NeFormalDeclList neFormalDeclList = formalDeclList.getDeclList();
-            NeExprList neExprList = exprList.getNeExprList();
-            
-            while (neFormalDeclList != null) {
-                VarDecl varDecl = neFormalDeclList.getVarDecl();
-                if (varDecl.isMutable()) {
-                    mutableMap.put(varDecl.getIdent(), evaluateExpr(neExprList.getExpr(), func));
-                } else {
-                    immutableMap.put(varDecl.getIdent(), evaluateExpr(neExprList.getExpr(), func));
-                }
-                typeMap.put(varDecl.getIdent(), varDecl.getType().toString());
-                neFormalDeclList = neFormalDeclList.getDeclList();
-                neExprList = neExprList.getNeExprList();
-            }
-        }
+        NeFormalDeclList neFormalDeclList = formalDeclList == null ? null : formalDeclList.getDeclList();
+        NeExprList neExprList = exprList == null ? null : exprList.getNeExprList();
 
-        // Create a new function for recursion
-        FuncDef newFunc = new FuncDef(calledFunc.getVarDecl(), calledFunc.getDeclList(), calledFunc.getStmtList(), calledFunc.getLocation());
+        while (neFormalDeclList != null) {
+            VarDecl varDecl = neFormalDeclList.getVarDecl();
+            Q value = evaluateExpr(neExprList.getExpr(), func);
+            if (varDecl.isMutable()) {
+                mutableMap.put(varDecl.getIdent(), value);
+            } else {
+                immutableMap.put(varDecl.getIdent(), value);
+            }
+            typeMap.put(varDecl.getIdent(), varDecl.getType().toString());
+            neFormalDeclList = neFormalDeclList.getDeclList();
+            neExprList = neExprList.getNeExprList();
+        }
+        
+        FuncDef newFunc = new FuncDef(calledFunc.getVarDecl(), formalDeclList, calledFunc.getStmtList(), null);
         newFunc.getMutableMap().putAll(mutableMap);
         newFunc.getImmutableMap().putAll(immutableMap);
         newFunc.getTypeMap().putAll(typeMap);
-        return evaluateStmtList(newFunc.getStmtList(), newFunc);
+
+        return evaluateStmtList(calledFunc.getStmtList(), newFunc);
     }
 
     Q executeRoot(Program astRoot, long arg) {
@@ -262,12 +269,16 @@ public class Interpreter {
         } else if (stmt instanceof WhileStmt) {
             WhileStmt whileStmt = (WhileStmt)stmt;
             while (evaluateCond(whileStmt.getCond(), func)) {
-                evaluateStmt(whileStmt.getStmt(), func);
+                Q value = evaluateStmt(whileStmt.getStmt(), func);
+                if (value != null) {
+                    return value;
+                }
             }
             return null;
         } else if (stmt instanceof CallStmt) {
             CallStmt callStmt = (CallStmt)stmt;
-            return executeCall(callStmt.getIdent(), callStmt.getExprList(), func);
+            executeCall(callStmt.getIdent(), callStmt.getExprList(), func);
+            return null;
         } else if (stmt instanceof PrintStmt) {
             Q value = evaluateExpr(((PrintStmt)stmt).getExpr(), func);
             System.out.println(value);
@@ -283,7 +294,7 @@ public class Interpreter {
 
     Q evaluateExpr(Expr expr, FuncDef func) {
         if (expr instanceof NilExpr) {
-            return null;
+            return new Ref(null, null);
         } else if (expr instanceof ConstExpr) {
             ConstExpr constExpr = (ConstExpr)expr;
             return new Int(constExpr.getValue());
@@ -293,9 +304,9 @@ public class Interpreter {
             HashMap<String, Q> immutableMap = func.getImmutableMap();
 
             if (mutableMap.containsKey(identExpr.getIdent())) {
-                return new Val(mutableMap.get(identExpr.getIdent()));
+                return mutableMap.get(identExpr.getIdent());
             } else if (immutableMap.containsKey(identExpr.getIdent())) {
-                return new Val(immutableMap.get(identExpr.getIdent()));
+                return immutableMap.get(identExpr.getIdent());
             } else {
                 throw new RuntimeException("Variable not found: " + identExpr.getIdent());
             }
@@ -331,16 +342,16 @@ public class Interpreter {
     Boolean evaluateCond(Cond cond, FuncDef func) {
         if (cond instanceof BinaryCond) {
             BinaryCond binaryCond = (BinaryCond)cond;
-            Q left = evaluateExpr(binaryCond.getLeft(), func);
-            Q right = evaluateExpr(binaryCond.getRight(), func);
-            Long lVal = ((Int)left).getValue();
-            Long rVal = ((Int)right).getValue();
+            Int left = (Int) evaluateExpr(binaryCond.getLeft(), func);
+            Int right = (Int) evaluateExpr(binaryCond.getRight(), func);
+            Long lVal = left.getValue();
+            Long rVal = right.getValue();
 
             switch (binaryCond.getOperator()) {
                 case BinaryCond.LE: return lVal <= rVal;
                 case BinaryCond.GE: return lVal >= rVal;
-                case BinaryCond.EQ: return lVal == rVal;
-                case BinaryCond.NE: return lVal != rVal;
+                case BinaryCond.EQ: return lVal.equals(rVal);
+                case BinaryCond.NE: return !lVal.equals(rVal);
                 case BinaryCond.LT: return lVal < rVal;
                 case BinaryCond.GT: return lVal > rVal;
                 default: throw new RuntimeException("Unhandled operator");
