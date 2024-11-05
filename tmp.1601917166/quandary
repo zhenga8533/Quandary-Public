@@ -1,0 +1,7 @@
+#!/bin/bash
+
+MYDIR=`dirname $BASH_SOURCE`
+
+java -cp "$CUP_DIR/java-cup-11b-runtime.jar:$MYDIR" -ss1g -ea interpreter.Interpreter $*
+
+echo Quandary process returned $?
