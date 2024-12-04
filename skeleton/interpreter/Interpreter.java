@@ -137,15 +137,15 @@ public class Interpreter {
         }
     }
 
-    Q callBuiltInFunction(String name, Q... args) {
-        if (name.equals("randomInt") && args.length == 1) {
+    Q callBuiltInFunction(String name, Q... args, FuncDef func) {
+        if (name.equals("randomInt")) {
             int value = (int) ((Int) args[0]).getValue();
             return new Int(random.nextInt(value));
-        } else if (name.equals("left") && args.length == 1) {
+        } else if (name.equals("left")) {
             return ((Ref) args[0]).getLeft();
-        } else if (name.equals("right") && args.length == 1) {
+        } else if (name.equals("right")) {
             return ((Ref) args[0]).getRight();
-        } else if (name.equals("isAtom") && args.length == 1) {
+        } else if (name.equals("isAtom")) {
             if (args[0] instanceof Int) {
                 return new Int(1);
             } else if (args[0] instanceof Ref) {
@@ -154,7 +154,7 @@ public class Interpreter {
             } else {
                 return new Int(0);
             }
-        } else if (name.equals("isNil") && args.length == 1) {
+        } else if (name.equals("isNil")) {
             if (args[0] instanceof Int) {
                 return new Int(0);
             } else if (args[0] instanceof Ref) {
@@ -163,13 +163,17 @@ public class Interpreter {
             } else {
                 return new Int(0);
             }
-        } else if (name.equals("setLeft") && args.length == 2) {
+        } else if (name.equals("setLeft")) {
             Ref ref = (Ref) args[0];
             ref.setLeft(args[1]);
             return new Int(1);
-        } else if (name.equals("setRight") && args.length == 2) {
+        } else if (name.equals("setRight")) {
             Ref ref = (Ref) args[0];
             ref.setRight(args[1]);
+            return new Int(1);
+        } else if (name.equals("acq")) {
+            return new Int(1);
+        } else if (name.equals("rel")) {
             return new Int(1);
         } else {
             throw new RuntimeException("Unhandled function " + name);
@@ -182,7 +186,7 @@ public class Interpreter {
         // If the function is not defined, try a built-in function
         if (calledFunc == null) {
             if (exprList == null) {
-                return callBuiltInFunction(name);
+                return callBuiltInFunction(name, new Q[0], func);
             }
 
             NeExprList neExprList = exprList.getNeExprList();
@@ -192,7 +196,7 @@ public class Interpreter {
                 args[i++] = evaluateExpr(neExprList.getExpr(), func);
                 neExprList = neExprList.getNeExprList();
             }
-            return callBuiltInFunction(name, args);
+            return callBuiltInFunction(name, args, func);
         }
 
         // If the function is defined, execute it
