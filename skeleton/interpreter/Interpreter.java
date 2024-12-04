@@ -12,6 +12,7 @@ import ast.BinaryExpr;
 import ast.BracketStmt;
 import ast.CallExpr;
 import ast.CallStmt;
+import ast.ConcurrentExpr;
 import ast.Cond;
 import ast.ConstExpr;
 import ast.DeclStmt;
@@ -137,7 +138,7 @@ public class Interpreter {
         }
     }
 
-    Q callBuiltInFunction(String name, Q... args, FuncDef func) {
+    Q callBuiltInFunction(String name, Q... args) {
         if (name.equals("randomInt")) {
             int value = (int) ((Int) args[0]).getValue();
             return new Int(random.nextInt(value));
@@ -172,8 +173,12 @@ public class Interpreter {
             ref.setRight(args[1]);
             return new Int(1);
         } else if (name.equals("acq")) {
+            Ref ref = (Ref) args[0];
+            ref.lock();
             return new Int(1);
         } else if (name.equals("rel")) {
+            Ref ref = (Ref) args[0];
+            ref.unlock();
             return new Int(1);
         } else {
             throw new RuntimeException("Unhandled function " + name);
@@ -186,7 +191,7 @@ public class Interpreter {
         // If the function is not defined, try a built-in function
         if (calledFunc == null) {
             if (exprList == null) {
-                return callBuiltInFunction(name, new Q[0], func);
+                return callBuiltInFunction(name);
             }
 
             NeExprList neExprList = exprList.getNeExprList();
@@ -196,7 +201,7 @@ public class Interpreter {
                 args[i++] = evaluateExpr(neExprList.getExpr(), func);
                 neExprList = neExprList.getNeExprList();
             }
-            return callBuiltInFunction(name, args, func);
+            return callBuiltInFunction(name, args);
         }
 
         // If the function is defined, execute it
@@ -380,12 +385,13 @@ public class Interpreter {
             }
         } else if (expr instanceof ConcurrentExpr) {
             ConcurrentExpr concurrentExpr = (ConcurrentExpr) expr;
-            BinaryExpr expr = concurrentExpr.getExpr();
-            Expr leftExpr = expr.getLeftExpr();
-            Expr rightExpr = expr.getRightExpr();
+            BinaryExpr binaryExpr = concurrentExpr.getExpr();
+            Expr leftExpr = binaryExpr.getLeftExpr();
+            Expr rightExpr = binaryExpr.getRightExpr();
 
-            Thread leftThread = new Thread(() -> evaluateExpr(leftExpr, func));
-            Thread rightThread = new Thread(() -> evaluateExpr(rightExpr, func));
+            Q[] evals = new Q[2];
+            Thread leftThread = new Thread(() -> evals[0] = (evaluateExpr(leftExpr, func)));
+            Thread rightThread = new Thread(() -> evals[1] = (evaluateExpr(rightExpr, func)));
             leftThread.start();
             rightThread.start();
             try {
@@ -393,6 +399,21 @@ public class Interpreter {
                 rightThread.join();
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
+            }
+
+            Q left = evals[0];
+            Q right = evals[1];
+            switch (binaryExpr.getOperator()) {
+                case BinaryExpr.PLUS:
+                    return new Int(((Int) left).getValue() + ((Int) right).getValue());
+                case BinaryExpr.MINUS:
+                    return new Int(((Int) left).getValue() - ((Int) right).getValue());
+                case BinaryExpr.TIMES:
+                    return new Int(((Int) left).getValue() * ((Int) right).getValue());
+                case BinaryExpr.PERIOD:
+                    return new Ref(left, right);
+                default:
+                    throw new RuntimeException("Unhandled operator");
             }
         } else {
             throw new RuntimeException("Unhandled Expr type");
