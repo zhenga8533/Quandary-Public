@@ -374,6 +374,22 @@ public class Interpreter {
                 default:
                     throw new RuntimeException("Unhandled operator");
             }
+        } else if (expr instanceof ConcurrentExpr) {
+            ConcurrentExpr concurrentExpr = (ConcurrentExpr) expr;
+            BinaryExpr expr = concurrentExpr.getExpr();
+            Expr leftExpr = expr.getLeftExpr();
+            Expr rightExpr = expr.getRightExpr();
+
+            Thread leftThread = new Thread(() -> evaluateExpr(leftExpr, func));
+            Thread rightThread = new Thread(() -> evaluateExpr(rightExpr, func));
+            leftThread.start();
+            rightThread.start();
+            try {
+                leftThread.join();
+                rightThread.join();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
         } else {
             throw new RuntimeException("Unhandled Expr type");
         }
