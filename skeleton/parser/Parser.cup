@@ -27,7 +27,7 @@ parser code {:
 
 :};
 
-terminal RET, SEMICOL, LBRACKET, RBRACKET;
+terminal RET, SEMICOL, LCURLY, RCURLY, LBRACKET, RBRACKET;
 terminal PRINT, IF, ELSE, WHILE, COMMA, PERIOD, EQUAL, MUTABLE;
 terminal PLUS, MINUS, TIMES, UMINUS, LPAREN, RPAREN;
 terminal LE, GE, EQ, NE, LT, GT, AND, OR, NOT;
@@ -69,7 +69,7 @@ funcDefList ::= funcDef:f funcDefList:l
                 {: RESULT = null; :}
             ;
 
-funcDef ::= varDecl:v LPAREN formalDeclList:l RPAREN LBRACKET stmtList:s RBRACKET
+funcDef ::= varDecl:v LPAREN formalDeclList:l RPAREN LCURLY stmtList:s RCURLY
             {: RESULT = new FuncDef(v, l, s, loc(vleft, vright)); :}
          ;
 
@@ -121,7 +121,7 @@ stmt ::= varDecl:v EQUAL expr:e SEMICOL
             {: RESULT = new PrintStmt(e, loc(eleft, eright)); :}
          |  RET expr:e SEMICOL
             {: RESULT = new ReturnStmt(e, loc(eleft, eright)); :}
-         |  LBRACKET stmtList:l RBRACKET
+         |  LCURLY stmtList:l RCURLY
             {: RESULT = new BracketStmt(l, loc(lleft, lright)); :}
          ;
 
@@ -152,6 +152,8 @@ expr ::= NIL:n
          {: RESULT = new CallExpr(i, l, loc(ileft, iright)); :}
       |  binaryExpr:e
          {: RESULT = e; :}
+      |  LBRACKET binaryExpr:e RBRACKET
+         {: RESULT = new ConcurrentExpr(e, loc(eleft, eright)); :}
       |  LPAREN expr:e RPAREN
          {: RESULT = e; :}
       ;

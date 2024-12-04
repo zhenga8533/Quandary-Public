@@ -87,8 +87,10 @@ white_space = {new_line} | [ \t\f]
 "*"                 { return symbol("*",  TIMES); }
 "("                 { return symbol("(",  LPAREN); }
 ")"                 { return symbol(")",  RPAREN); }
-"{"                 { return symbol("{",  LBRACKET); }
-"}"                 { return symbol("}",  RBRACKET); }
+"{"                 { return symbol("{",  LCURLY); }
+"}"                 { return symbol("}",  RCURLY); }
+"["                 { return symbol("[",  LBRACKET); }
+"]"                 { return symbol("]",  RBRACKET); }
 
 "<="                { return symbol("<=",  LE); }
 ">="                { return symbol(">=",  GE); }
